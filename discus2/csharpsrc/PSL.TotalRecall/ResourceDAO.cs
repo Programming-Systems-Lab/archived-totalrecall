@@ -52,13 +52,15 @@ namespace PSL.TotalRecall
 			return lstResources;
 		}
 		
-		public ArrayList GetSharedResources( string strMeetingID )
+		public Hashtable GetSharedResources( string strMeetingID, string strOwner )
 		{
 			// Quick error checks
 			if( strMeetingID == null || strMeetingID.Length == 0 )
 				throw new ArgumentException( "Invalid meeting ID", "strMeetingID" );
+			if( strOwner == null || strOwner.Length == 0 )
+				throw new ArgumentException( "Invalid owner", "strOwner" );
 			
-			ArrayList lstResources = new ArrayList();
+			Hashtable resources = new Hashtable();
 			OdbcDataReader dr = null;
 						
 			try
@@ -90,6 +92,10 @@ namespace PSL.TotalRecall
 				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_STATE );
 				strQueryBuilder.Append( "=" );
 				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( enuResourceState.Shared.ToString() ) + "'" );
+				strQueryBuilder.Append( " AND " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_OWNER );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strOwner ) + "'" );
 
 				dr =  QueryService.ExecuteReader( this.DBConnect, strQueryBuilder.ToString() );
 				
@@ -103,11 +109,12 @@ namespace PSL.TotalRecall
 					res.ID = (string) dr[Constants.RES_ID];
 					res.Name = (string) dr[Constants.RES_NAME];
 					res.Url = (string) dr[Constants.RES_URL];
-					string strOwner = (string) dr[Constants.RES_OWNER];
-
+					
 					MeetingResource mtgRes =  new MeetingResource( res, strMeetingID, strOwner );
 					mtgRes.State = (enuResourceState) enuResourceState.Parse( typeof(enuResourceState), (string) dr[Constants.RES_STATE], true );
-					lstResources.Add( mtgRes );
+					
+					if( resources[mtgRes.ID] == null )
+						resources.Add( mtgRes.ID, mtgRes );
 				}
 			}
 			catch( Exception /*e*/ )
@@ -119,16 +126,18 @@ namespace PSL.TotalRecall
 					dr.Close();
 			}
 
-			return lstResources;
+			return resources;
 		}
 			
-		public ArrayList GetRecalledResources( string strMeetingID )
+		public Hashtable GetRecalledResources( string strMeetingID, string strOwner )
 		{
 			// Quick error checks
 			if( strMeetingID == null || strMeetingID.Length == 0 )
 				throw new ArgumentException( "Invalid meeting ID", "strMeetingID" );
+			if( strOwner == null || strOwner.Length == 0 )
+				throw new ArgumentException( "Invalid owner", "strOwner" );
 			
-			ArrayList lstResources = new ArrayList();
+			Hashtable resources = new Hashtable();
 			OdbcDataReader dr = null;
 						
 			try
@@ -160,6 +169,10 @@ namespace PSL.TotalRecall
 				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_STATE );
 				strQueryBuilder.Append( "=" );
 				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( enuResourceState.Recalled.ToString() ) + "'" );
+				strQueryBuilder.Append( " AND " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_OWNER );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strOwner ) + "'" );
 
 				dr =  QueryService.ExecuteReader( this.DBConnect, strQueryBuilder.ToString() );
 				
@@ -173,11 +186,12 @@ namespace PSL.TotalRecall
 					res.ID = (string) dr[Constants.RES_ID];
 					res.Name = (string) dr[Constants.RES_NAME];
 					res.Url = (string) dr[Constants.RES_URL];
-					string strOwner = (string) dr[Constants.RES_OWNER];
-
+					
 					MeetingResource mtgRes =  new MeetingResource( res, strMeetingID, strOwner );
 					mtgRes.State = (enuResourceState) enuResourceState.Parse( typeof(enuResourceState), (string) dr[Constants.RES_STATE], true );
-					lstResources.Add( mtgRes );
+					
+					if( resources[mtgRes.ID] == null )
+						resources.Add( mtgRes.ID, mtgRes );
 				}
 			}
 			catch( Exception /*e*/ )
@@ -189,16 +203,16 @@ namespace PSL.TotalRecall
 					dr.Close();
 			}
 
-			return lstResources;
+			return resources;
 		}
 
-		public ArrayList GetMeetingResources( string strMeetingID )
+		public Hashtable GetMeetingResources( string strMeetingID )
 		{
 			// Quick error checks
 			if( strMeetingID == null || strMeetingID.Length == 0 )
 				throw new ArgumentException( "Invalid meeting ID", "strMeetingID" );
 			
-			ArrayList lstResources = new ArrayList();
+			Hashtable resources = new Hashtable();
 			OdbcDataReader dr = null;
 						
 			try
@@ -243,7 +257,9 @@ namespace PSL.TotalRecall
 
 					MeetingResource mtgRes =  new MeetingResource( res, strMeetingID, strOwner );
 					mtgRes.State = (enuResourceState) enuResourceState.Parse( typeof(enuResourceState), (string) dr[Constants.RES_STATE], true );
-					lstResources.Add( mtgRes );
+					
+					if( resources[mtgRes.ID] == null )
+						resources.Add( mtgRes.ID, mtgRes );
 				}
 			}
 			catch( Exception /*e*/ )
@@ -255,7 +271,7 @@ namespace PSL.TotalRecall
 					dr.Close();
 			}
 
-			return lstResources;
+			return resources;
 		}
 
 		public ArrayList GetResourcePolicies( string strResourceID )
