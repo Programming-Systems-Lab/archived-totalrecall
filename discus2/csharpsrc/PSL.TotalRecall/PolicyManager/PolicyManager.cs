@@ -19,7 +19,7 @@ namespace PSL.TotalRecall.PolicyManager
 		/// <summary>
 		/// The serializer to use for deserializing policy documents
 		/// </summary>
-		private XmlSerializer serializer = new XmlSerializer(typeof(Policy));
+		private static XmlSerializer serializer = new XmlSerializer(typeof(Policy));
 
 		/// <summary>
 		/// A table of mappings between namespaces of policy expression and the corresponding 
@@ -42,8 +42,6 @@ namespace PSL.TotalRecall.PolicyManager
 		[STAThread]
 		static void Main(string[] args)
 		{
-			PolicyManager manager = new PolicyManager();
-
 			Console.WriteLine("Enter name of policy XML doc to evaluate, or [Enter] to exit.");
 			while (true) 
 			{
@@ -60,7 +58,7 @@ namespace PSL.TotalRecall.PolicyManager
 					string doc = reader.ReadToEnd();
 					reader.Close();
 
-					EvaluationResult result = manager.evaluatePolicy(doc, new TestContext());
+					EvaluationResult result = PolicyManager.evaluatePolicy(doc, new TestContext());
 					result.dumpResults(Console.Out);
 				}
 				catch (Exception e) 
@@ -85,22 +83,18 @@ namespace PSL.TotalRecall.PolicyManager
 
 			evaluators = new Hashtable();
 
-			// initialize table 
-			// TODO: probably read this from some config file
-			// use ConfigurationSettings.AppSettings["foo"];
-			/*evaluatorNames = new Hashtable();
 			
-			evaluatorNames.Add("http://psl.cs.columbia.edu/discus2/All",
-				"PSL.TotalRecall.PolicyManager.AllEvaluator");
-			
-			evaluatorNames.Add("http://psl.cs.columbia.edu/discus2/RequiresParticipants",
-				"PSL.TotalRecall.PolicyManager.RequiresParticipantsEvaluator");
-
-			evaluatorNames.Add("http://psl.cs.columbia.edu/discus2/RequiresTopic",
-				"PSL.TotalRecall.PolicyManager.RequiresTopicEvaluator");
-				*/
 		}
 
+		
+		/// <summary>
+		/// Default constructor is private since at this point all the methods exposed
+		/// are static.
+		/// </summary>
+		private PolicyManager() 
+		{
+		}
+		
 		/// <summary>
 		/// Evaluates a policy with respect to the given context.
 		/// </summary>
@@ -113,7 +107,7 @@ namespace PSL.TotalRecall.PolicyManager
 		///	<exception cref="PSL.TotalRecall.PolicyManager.PolicyManagerException">
 		///		Thrown if there is a problem parsing the XML or analysing the policy.
 		///	</exception>
-		public EvaluationResult evaluatePolicy(string policyDoc, IContext context)
+		public static EvaluationResult evaluatePolicy(string policyDoc, IContext context)
 		{
 			
 			if (policyDoc == null || context == null) 
@@ -151,7 +145,7 @@ namespace PSL.TotalRecall.PolicyManager
 		///	<exception cref="PSL.TotalRecall.PolicyManager.PolicyManagerException">
 		///		Thrown if there is a problem parsing the XML or analysing the policy.
 		///	</exception>
-		public EvaluationResult evaluatePolicy(XmlDocument policyDoc, IContext context)
+		public static EvaluationResult evaluatePolicy(XmlDocument policyDoc, IContext context)
 		{
 			
 			if (policyDoc == null || context == null) 
@@ -223,6 +217,25 @@ namespace PSL.TotalRecall.PolicyManager
 			return result;
 		}
 
+		
+		/// <summary>
+		/// Returns the string to use to connect to the PolicyManager database.
+		/// 
+		/// Note: assumes one database used for all instances (possible problem)
+		/// Reason: PolicyReferenceEvaluator, for example, needs to know the db
+		/// connection string for its PolicyDAO object, but it gets instantiated 
+		/// like all others evaluators, making it harder to use a particular constructor.
+		/// Possible workaround: add an argument that identifies the object calling?
+		/// </summary>
+		/// <returns></returns>
+		public static string DatabaseConnectionString 
+		{
+			get 
+			{
+				return ConfigurationSettings.AppSettings["DatabaseConnectionString"];	
+			}
+		}
+		
 		private static void debug(Object o) 
 		{
 #if DEBUG
