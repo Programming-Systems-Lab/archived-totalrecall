@@ -65,7 +65,7 @@ namespace PSL.TotalRecall
 			return policy;
 		}
 
-		public bool UpdatePolicy( string strPolicyID, string strPolicy )
+		public bool UpdatePolicy( string strPolicyID, string strPolicy, string name )
 		{
 			// Quick error checks
 			if( strPolicy == null || strPolicy.Length == 0 )
@@ -84,6 +84,10 @@ namespace PSL.TotalRecall
 				strQueryBuilder.Append( Constants.ACCPOL_DOC );
 				strQueryBuilder.Append( "=" );
 				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strPolicy ) + "'" );
+				strQueryBuilder.Append( " , " );
+				strQueryBuilder.Append( Constants.ACCPOL_NAME);
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( name ) + "'" );
 				strQueryBuilder.Append( " WHERE " );
 				strQueryBuilder.Append( Constants.ACCPOL_ID );
 				strQueryBuilder.Append( "=" );
