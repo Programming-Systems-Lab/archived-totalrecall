@@ -93,6 +93,15 @@ namespace PSL.TotalRecall
 				bIsResponse = true;
 			}
 
+			// If a context message is not a response then it is a regular
+			// received message
+			if( !bIsResponse )
+			{
+				// Check whether we have received this context message twice
+				if( this.IsContextMessageReceivedTwice( ctxMsg ) )
+					return true;
+			}
+
 			try
 			{
 				StringBuilder strQueryBuilder = new StringBuilder();
@@ -110,7 +119,7 @@ namespace PSL.TotalRecall
 				strQueryBuilder.Append( Constants.CONTACT_LOC );
 				strQueryBuilder.Append( "," );
 				strQueryBuilder.Append( Constants.CTXMSG );
-				if( bIsResponse )
+				if( !bIsResponse )
 				{
 					strQueryBuilder.Append( "," );
 					strQueryBuilder.Append( Constants.NEWMSG );
@@ -129,10 +138,12 @@ namespace PSL.TotalRecall
 				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( ctxMsg.SenderUrl ) + "'" );
 				strQueryBuilder.Append( "," );
 				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( ctxMsg.ToXml() ) + "'" );
-				if( bIsResponse )
+				if( !bIsResponse )
 				{
 					strQueryBuilder.Append( "," );
-					strQueryBuilder.Append( "'" + bMarkAsNewMsg.ToString() + "'" );
+					if( bMarkAsNewMsg == true )
+						strQueryBuilder.Append( 1 );
+					else strQueryBuilder.Append( 0 );
 				}
 				strQueryBuilder.Append( ")" );
 
@@ -216,6 +227,54 @@ namespace PSL.TotalRecall
 			
 			return lstMessages;
 		}
+
+		public bool IsContextMessageReceivedTwice( ContextMsg ctxMsg )
+		{
+			// Quick error checks
+			if( ctxMsg == null )
+				throw new ArgumentNullException( "ctxMsg", "Invalid context message" );
+
+			bool bRetVal = false;
+			OdbcDataReader dr = null;
+
+			try
+			{
+				StringBuilder strQueryBuilder = new StringBuilder();
+				strQueryBuilder.Append( " SELECT COUNT(*) " );
+				strQueryBuilder.Append( " FROM " );
+				strQueryBuilder.Append( Constants.CONTEXT_MSGS_RECEIVED_TABLENAME );
+				strQueryBuilder.Append( " WHERE " );
+				strQueryBuilder.Append( Constants.CTXMSG_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( ctxMsg.MessageID ) + "'" );
+
+				dr =  QueryService.ExecuteReader( this.DBConnect, strQueryBuilder.ToString() );
+				if( dr == null )
+					throw new Exception( "Null data reader returned from query" );
+				
+				// Advance data reader to first record
+				if( dr.Read() )
+				{
+					int nCount = -1;
+					if( !dr.IsDBNull( 0 ) )
+						nCount = dr.GetInt32( 0 );
+					
+					if( nCount >= 1 )
+						bRetVal = true;
+				}
+			}
+			catch( Exception /*e*/ )
+			{
+			}
+			finally
+			{
+				if( dr != null )
+					dr.Close();
+			}
+
+			return bRetVal;
+		}
+
 
 		// A context msg is treated as a response if there is a match for
 		// the message id in the context messages sent table
