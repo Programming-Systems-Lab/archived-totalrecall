@@ -23,6 +23,6 @@ namespace PSL.TotalRecall.PolicyManager
 	{
     
 		/// <remarks/>
-		public int policyId;
+		public string policyId;
 	}
 }
