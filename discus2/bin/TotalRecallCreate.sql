@@ -173,7 +173,7 @@ create table ContextMessagesReceived
 	MODIFYDATE DATETIME NOT NULL DEFAULT GETDATE(),
 	CONTACT_LOC nvarchar(256) not null check(len(CONTACT_LOC) > 0 ),
 	CTXMSG ntext not null,
-	NEWMSG bit not null DEFAULT 'true'
+	NEWMSG bit not null DEFAULT 1
 )
 
 -- Create set of triggers for select tables (6)
