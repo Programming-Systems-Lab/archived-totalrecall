@@ -1,6 +1,9 @@
 using System;
+using System.Collections;
 using System.Xml;
 using System.Xml.Serialization;
+
+using PSL.TotalRecall;
 
 namespace PSL.TotalRecall.PolicyManager
 {
@@ -14,6 +17,13 @@ namespace PSL.TotalRecall.PolicyManager
 		public const string TAG = "PolicyReference";
 
 		private XmlSerializer serializer = new XmlSerializer(typeof(PolicyReference));
+		private PolicyDAO policyDAO;
+
+		public PolicyReferenceEvaluator() 
+		{
+			policyDAO = new PolicyDAO(PolicyManager.DatabaseConnectionString);
+
+		}
 
 		public EvaluationResult evaluateExpression(XmlElement expressionDoc, IContext context)
 		{
@@ -31,10 +41,26 @@ namespace PSL.TotalRecall.PolicyManager
 			}
 
 			// TODO: load policy reference from DB
+			try 
+			{
+				string policyDoc = policyDAO.GetPolicy(expression.policyId);
 
-			XmlElement policy = null;
-
-			return PolicyManager.invokeEvaluator(policy, context);
+				if (policyDoc == null || policyDoc.Length == 0) 
+				{
+					return new EvaluationResult(TAG, false, "Policy with id " + expression.policyId + " not found in database.");
+				}
+				else 
+				{
+					EvaluationResult result = PolicyManager.evaluatePolicy(policyDoc, context);
+					ArrayList list = new ArrayList();
+					list.Add(result);
+					return new EvaluationResult(TAG, result.Result, "Evaluated policy id " + expression.policyId, list);
+				}
+			}
+			catch (PolicyManagerException e) 
+			{
+				return new EvaluationResult(TAG, false, "Could not evaluate policy id " + expression.policyId);
+			}
 			
 		}
 
