@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xs:schema id="NewDataSet" targetNamespace="http://schemas.xmlsoap.org/ws/2002/12/policy" xmlns:mstns="http://schemas.xmlsoap.org/ws/2002/12/policy" xmlns="http://schemas.xmlsoap.org/ws/2002/12/policy" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" attributeFormDefault="qualified" elementFormDefault="qualified">
+	<xs:element name="Policy" msdata:Prefix="wsp">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ExactlyOne" msdata:Prefix="wsp" type="xs:string" minOccurs="0" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:Prefix="wsp">
+		<xs:complexType>
+			<xs:choice maxOccurs="unbounded">
+				<xs:element ref="Policy" />
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
