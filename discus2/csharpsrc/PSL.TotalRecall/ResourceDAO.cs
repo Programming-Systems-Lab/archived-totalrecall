@@ -128,7 +128,78 @@ namespace PSL.TotalRecall
 
 			return resources;
 		}
+		
+		public Hashtable GetSharedResources( string strMeetingID )
+		{
+			// Quick error checks
+			if( strMeetingID == null || strMeetingID.Length == 0 )
+				throw new ArgumentException( "Invalid meeting ID", "strMeetingID" );
 			
+			Hashtable resources = new Hashtable();
+			OdbcDataReader dr = null;
+						
+			try
+			{
+				StringBuilder strQueryBuilder = new StringBuilder();
+				strQueryBuilder.Append( " SELECT " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_ID );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_OWNER );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_STATE );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.RESOURCES_TABLENAME + "." + Constants.RES_URL );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.RESOURCES_TABLENAME + "." + Constants.RES_NAME );
+				strQueryBuilder.Append( " FROM " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.RESOURCES_TABLENAME );
+				strQueryBuilder.Append( " WHERE " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.MTG_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strMeetingID ) + "'" );
+				strQueryBuilder.Append( " AND " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( Constants.RESOURCES_TABLENAME + "." + Constants.RES_ID );
+				strQueryBuilder.Append( " AND " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_STATE );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( enuResourceState.Shared.ToString() ) + "'" );
+				
+				dr =  QueryService.ExecuteReader( this.DBConnect, strQueryBuilder.ToString() );
+				
+				if( dr == null )
+					throw new Exception( "Null data reader returned from query" );
+
+				// Scroll thru list returned
+				while( dr.Read() )
+				{
+					Resource res = new Resource();
+					res.ID = (string) dr[Constants.RES_ID];
+					res.Name = (string) dr[Constants.RES_NAME];
+					res.Url = (string) dr[Constants.RES_URL];
+					string strOwner = (string) dr[Constants.RES_OWNER];
+					MeetingResource mtgRes =  new MeetingResource( res, strMeetingID, strOwner );
+					mtgRes.State = (enuResourceState) enuResourceState.Parse( typeof(enuResourceState), (string) dr[Constants.RES_STATE], true );
+					
+					if( resources[mtgRes.ID] == null )
+						resources.Add( mtgRes.ID, mtgRes );
+				}
+			}
+			catch( Exception /*e*/ )
+			{
+			}
+			finally
+			{
+				if( dr != null )
+					dr.Close();
+			}
+
+			return resources;
+		}
+
 		public Hashtable GetRecalledResources( string strMeetingID, string strOwner )
 		{
 			// Quick error checks
@@ -187,6 +258,78 @@ namespace PSL.TotalRecall
 					res.Name = (string) dr[Constants.RES_NAME];
 					res.Url = (string) dr[Constants.RES_URL];
 					
+					MeetingResource mtgRes =  new MeetingResource( res, strMeetingID, strOwner );
+					mtgRes.State = (enuResourceState) enuResourceState.Parse( typeof(enuResourceState), (string) dr[Constants.RES_STATE], true );
+					
+					if( resources[mtgRes.ID] == null )
+						resources.Add( mtgRes.ID, mtgRes );
+				}
+			}
+			catch( Exception /*e*/ )
+			{
+			}
+			finally
+			{
+				if( dr != null )
+					dr.Close();
+			}
+
+			return resources;
+		}
+
+		public Hashtable GetRecalledResources( string strMeetingID )
+		{
+			// Quick error checks
+			if( strMeetingID == null || strMeetingID.Length == 0 )
+				throw new ArgumentException( "Invalid meeting ID", "strMeetingID" );
+			
+			Hashtable resources = new Hashtable();
+			OdbcDataReader dr = null;
+						
+			try
+			{
+				StringBuilder strQueryBuilder = new StringBuilder();
+				strQueryBuilder.Append( " SELECT " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_ID );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_OWNER );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_STATE );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.RESOURCES_TABLENAME + "." + Constants.RES_URL );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.RESOURCES_TABLENAME + "." + Constants.RES_NAME );
+				strQueryBuilder.Append( " FROM " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.RESOURCES_TABLENAME );
+				strQueryBuilder.Append( " WHERE " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.MTG_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strMeetingID ) + "'" );
+				strQueryBuilder.Append( " AND " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( Constants.RESOURCES_TABLENAME + "." + Constants.RES_ID );
+				strQueryBuilder.Append( " AND " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_STATE );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( enuResourceState.Recalled.ToString() ) + "'" );
+				
+				dr =  QueryService.ExecuteReader( this.DBConnect, strQueryBuilder.ToString() );
+				
+				if( dr == null )
+					throw new Exception( "Null data reader returned from query" );
+
+				// Scroll thru list returned
+				while( dr.Read() )
+				{
+					Resource res = new Resource();
+					res.ID = (string) dr[Constants.RES_ID];
+					res.Name = (string) dr[Constants.RES_NAME];
+					res.Url = (string) dr[Constants.RES_URL];
+					string strOwner = (string) dr[Constants.RES_OWNER];
+	
 					MeetingResource mtgRes =  new MeetingResource( res, strMeetingID, strOwner );
 					mtgRes.State = (enuResourceState) enuResourceState.Parse( typeof(enuResourceState), (string) dr[Constants.RES_STATE], true );
 					
