@@ -26,10 +26,13 @@ insert into ContextMessageTypes(CTXMSG_TYPE) values ('InfoAgentLeft')
 insert into ContextMessageTypes(CTXMSG_TYPE) values ('InfoAgentJoinedResponse')
 insert into ContextMessageTypes(CTXMSG_TYPE) values ('InfoAgentLeftResponse')
 
-insert into ContextMessageTypes(CTXMSG_TYPE) values ('ResourceAdd')
-insert into ContextMessageTypes(CTXMSG_TYPE) values ('ResourceRecall')
-insert into ContextMessageTypes(CTXMSG_TYPE) values ('ResourceAddResponse')
-insert into ContextMessageTypes(CTXMSG_TYPE) values ('ResourceRecallResponse')
+insert into ContextMessageTypes(CTXMSG_TYPE) values ('ResourceShared')
+insert into ContextMessageTypes(CTXMSG_TYPE) values ('ResourceRecalled')
+insert into ContextMessageTypes(CTXMSG_TYPE) values ('ResourceSharedResponse')
+insert into ContextMessageTypes(CTXMSG_TYPE) values ('ResourceRecalledResponse')
+insert into ContextMessageTypes(CTXMSG_TYPE) values ('ResourceUpdated')
+insert into ContextMessageTypes(CTXMSG_TYPE) values ('ResourceUpdatedResponse')
+
 
 insert into ContextMessageTypes(CTXMSG_TYPE) values ('RecommendationRequest')
 insert into ContextMessageTypes(CTXMSG_TYPE) values ('RecommendationResponse')

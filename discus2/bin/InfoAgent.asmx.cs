@@ -1793,6 +1793,10 @@ namespace TotalRecall
 			}
 			if( resMsg.m_lstResources.Count > 0 )
 			{
+				ResourceCtxMsg resCtxMsg = new ResourceCtxMsg( resMsg );
+				ContextMsgDAO ctxDAO = new ContextMsgDAO( this.DBConnect );
+				ctxDAO.ReceiveContextMessage( resCtxMsg, false );
+								
 				// Send a response
 				ContextMsgResponse ctxRespMsg = new ContextMsgResponse();
 				ctxRespMsg.MessageID = resMsg.MessageID;
@@ -1800,7 +1804,7 @@ namespace TotalRecall
 				ctxRespMsg.Ack = true;
 				ctxRespMsg.Sender = me.Name;
 				ctxRespMsg.SenderUrl = me.Location;
-				ctxRespMsg.Type = enuContextMsgType.ResourceShared;
+				ctxRespMsg.Type = enuContextMsgType.ResourceSharedResponse;
 				this.SendContextUpdate( ctxRespMsg, resMsg.Sender, resMsg.SenderUrl );
 			}
 		}
@@ -1873,6 +1877,9 @@ namespace TotalRecall
 
 		private void RecallResources( ResourceCtxMsg resCtxMsg )
 		{
+			ContextMsgDAO ctxMsgDAO = new ContextMsgDAO( this.DBConnect );
+			ctxMsgDAO.ReceiveContextMessage( resCtxMsg, false );
+			
 			// Only the owner and the meeting organizer know the resource ids
 			ResourceDAO resDAO = new ResourceDAO( this.DBConnect );
 			IEnumerator it = resCtxMsg.ResourceIDs.GetEnumerator();
@@ -1881,6 +1888,16 @@ namespace TotalRecall
 				string strResID = (string) it.Current;
 				resDAO.RecallResource( strResID );
 			}
+
+			// Send a response
+			ContextMsgResponse ctxRespMsg = new ContextMsgResponse();
+			ctxRespMsg.MessageID = resCtxMsg.MessageID;
+			ctxRespMsg.MeetingID = resCtxMsg.MeetingID;
+			ctxRespMsg.Ack = true;
+			ctxRespMsg.Sender = me.Name;
+			ctxRespMsg.SenderUrl = me.Location;
+			ctxRespMsg.Type = enuContextMsgType.ResourceRecalledResponse;
+			this.SendContextUpdate( ctxRespMsg, resCtxMsg.Sender, resCtxMsg.SenderUrl );
 		}
 	}
 }
