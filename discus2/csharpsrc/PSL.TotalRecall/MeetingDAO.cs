@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Text;
 using Microsoft.Data.Odbc;
 using PSL.TotalRecall.DataAccess;
@@ -226,6 +227,89 @@ namespace PSL.TotalRecall
 			}
 
 			return state;
+		}
+
+		public string GetMeetingTopic( string strMeetingID )
+		{
+			// Quick error checks
+			if( strMeetingID == null || strMeetingID.Length == 0 )
+				throw new ArgumentException( "Invalid meeting ID", "strMeetingID" );
+			
+			OdbcDataReader dr = null;
+			string strRetVal = "";
+			
+			try
+			{
+				StringBuilder strQueryBuilder = new StringBuilder();
+				strQueryBuilder.Append( " SELECT " );
+				strQueryBuilder.Append( Constants.MTG_TOPIC );
+				strQueryBuilder.Append( " FROM " );
+				strQueryBuilder.Append( Constants.MEETINGS_TABLENAME );
+				strQueryBuilder.Append( " WHERE " );
+				strQueryBuilder.Append( Constants.MTG_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strMeetingID ) + "'" );
+
+				dr =  QueryService.ExecuteReader( this.DBConnect, strQueryBuilder.ToString() );
+				
+				if( dr == null )
+					throw new Exception( "Null data reader returned from query" );
+
+				// Scroll thru list returned
+				if( dr.Read() )
+					strRetVal = (string)dr[Constants.MTG_TOPIC];
+			}
+			catch( Exception /*e*/ )
+			{
+			}
+			finally
+			{
+				if( dr != null )
+					dr.Close();
+			}
+
+			return strRetVal;
+		}
+
+		public ArrayList GetMeetingIDs( enuMeetingState state )
+		{
+			ArrayList lstMeetings = new ArrayList();
+			OdbcDataReader dr = null;
+						
+			try
+			{
+				StringBuilder strQueryBuilder = new StringBuilder();
+				strQueryBuilder.Append( " SELECT " );
+				strQueryBuilder.Append( Constants.MTG_ID );
+				strQueryBuilder.Append( " FROM " );
+				strQueryBuilder.Append( Constants.MEETINGS_TABLENAME );
+				strQueryBuilder.Append( " WHERE " );
+				strQueryBuilder.Append( Constants.MTG_STATE );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( state.ToString() ) + "'" );
+
+				dr =  QueryService.ExecuteReader( this.DBConnect, strQueryBuilder.ToString() );
+				
+				if( dr == null )
+					throw new Exception( "Null data reader returned from query" );
+
+				// Scroll thru list returned
+				while( dr.Read() )
+				{
+					// Add participant to list
+					lstMeetings.Add( (string) dr[Constants.MTG_ID] );
+				}
+			}
+			catch( Exception /*e*/ )
+			{
+			}
+			finally
+			{
+				if( dr != null )
+					dr.Close();
+			}
+
+			return lstMeetings;
 		}
 
 		// Methods that build on basic data access
