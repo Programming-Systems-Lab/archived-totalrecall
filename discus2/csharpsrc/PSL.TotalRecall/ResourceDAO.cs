@@ -730,12 +730,12 @@ namespace PSL.TotalRecall
 			return state;
 		}
 
-		public bool AddResourceToCategory( Resource res, string strName )
+		public bool AddResourceToCategory( Resource res, string categoryName )
 		{
 			// Quick error checks
 			if( res == null )
 				throw new ArgumentNullException( "res", "Invalid resource to add" );
-			if( strName == null || strName.Length == 0 )
+			if( categoryName == null || categoryName.Length == 0 )
 				throw new ArgumentException( "Invalid category name", "strName" );
 			
 			bool bRetVal = false;
@@ -754,8 +754,46 @@ namespace PSL.TotalRecall
 				strQueryBuilder.Append( "(" );
 				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( res.ID ) + "'" );
 				strQueryBuilder.Append( "," );
-				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strName ) + "'" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( categoryName ) + "'" );
 				strQueryBuilder.Append( ")" );
+				
+				int nRowsAffected = QueryService.ExecuteNonQuery( this.DBConnect, strQueryBuilder.ToString() );
+				if( nRowsAffected == 1 )
+					bRetVal = true;
+			}
+			catch( Exception /*e*/ )
+			{
+			}
+			finally
+			{
+			}
+
+			return bRetVal;
+		}
+
+		public bool RemoveResourceFromCategory( Resource res, string categoryName )
+		{
+			// Quick error checks
+			if( res == null )
+				throw new ArgumentNullException( "res", "Invalid resource to add" );
+			if( categoryName == null || categoryName.Length == 0 )
+				throw new ArgumentException( "Invalid category name", "strName" );
+			
+			bool bRetVal = false;
+
+			try
+			{
+				StringBuilder strQueryBuilder = new StringBuilder();
+				strQueryBuilder.Append( " DELETE FROM " );
+				strQueryBuilder.Append( Constants.RESOURCE_CATEGORIES_TABLENAME );
+				strQueryBuilder.Append( " WHERE " );
+				strQueryBuilder.Append( Constants.RES_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( res.ID ) + "'" );
+				strQueryBuilder.Append( " AND " );
+				strQueryBuilder.Append( Constants.CAT_NAME );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( categoryName ) + "'" );
 				
 				int nRowsAffected = QueryService.ExecuteNonQuery( this.DBConnect, strQueryBuilder.ToString() );
 				if( nRowsAffected == 1 )
