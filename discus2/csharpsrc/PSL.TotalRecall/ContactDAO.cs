@@ -46,20 +46,23 @@ namespace PSL.TotalRecall
 					throw new Exception( "Null data reader returned from query" );
 
 				// Advance data reader to first record
-				dr.Read();
-
-				int nCount = -1;
-				if( !dr.IsDBNull( 0 ) )
-					nCount = dr.GetInt32( 0 );
-				
-				if( nCount == 1 )
-					bRetVal = true;
+				if( dr.Read() )
+				{
+					int nCount = -1;
+					if( !dr.IsDBNull( 0 ) )
+						nCount = dr.GetInt32( 0 );
+					
+					if( nCount == 1 )
+						bRetVal = true;
+				}
 			}
 			catch( Exception /*e*/ )
 			{
 			}
 			finally
 			{
+				if( dr != null )
+					dr.Close();
 			}
 
 			return bRetVal;

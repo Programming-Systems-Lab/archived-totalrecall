@@ -25,6 +25,7 @@ namespace PSL.TotalRecall
 		public const string RESOURCES_TABLENAME				= "Resources";
 		public const string RESOURCE_STATES_TABLENAME		= "ResourceStates";
 		public const string ROLES_TABLENAME					= "Roles";
+		public const string RESOURCE_CATEGORIES_TABLENAME	= "ResourceCategories";
 
 		// Column names 
 		// Meetings table
@@ -38,6 +39,18 @@ namespace PSL.TotalRecall
 		public const string PART_LOC	= "PART_LOC";
 
 		public const string CONTACT_TRUST_SCORE	= "CONTACT_TRUST_SCORE";
+		
+		public const string ACCPOL_ID	= "ACCPOL_ID";
+		public const string ACCPOL_NAME = "ACCPOL_NAME";
+		public const string ACCPOL_DOC	= "ACCPOL_DOC";
+
+		public const string RES_ID		= "RES_ID";
+		public const string RES_NAME	= "RES_NAME";
+		public const string RES_URL		= "RES_URL";
+		public const string RES_STATE	= "RES_STATE";
+		public const string RES_OWNER	= "RES_OWNER";
+
+		public const string CAT_NAME	= "CAT_NAME";
 
 		public Constants()
 		{}

@@ -40,14 +40,15 @@ namespace PSL.TotalRecall
 					throw new Exception( "Null data reader returned from query" );
 
 				// Advance data reader to first record
-				dr.Read();
-
-				int nCount = -1;
-				if( !dr.IsDBNull( 0 ) )
-					nCount = dr.GetInt32( 0 );
-				
-				if( nCount == 0 )
-					bRetVal = true;
+				if( dr.Read() )
+				{
+					int nCount = -1;
+					if( !dr.IsDBNull( 0 ) )
+						nCount = dr.GetInt32( 0 );
+					
+					if( nCount == 0 )
+						bRetVal = true;
+				}
 			}
 			catch( Exception /*e*/ )
 			{
@@ -184,7 +185,49 @@ namespace PSL.TotalRecall
 
 			return bRetVal;
 		}
+		
+		public enuMeetingState GetMeetingState( string strMeetingID )
+		{
+			// Quick error checks
+			if( strMeetingID == null || strMeetingID.Length == 0 )
+				throw new ArgumentException( "Invalid meeting ID", "strMeetingID" );
+			
+			OdbcDataReader dr = null;
+			enuMeetingState state = new enuMeetingState();
+			
+			try
+			{
+				StringBuilder strQueryBuilder = new StringBuilder();
+				strQueryBuilder.Append( " SELECT " );
+				strQueryBuilder.Append( Constants.MTG_STATE );
+				strQueryBuilder.Append( " FROM " );
+				strQueryBuilder.Append( Constants.MEETINGS_TABLENAME );
+				strQueryBuilder.Append( " WHERE " );
+				strQueryBuilder.Append( Constants.MTG_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strMeetingID ) + "'" );
+
+				dr =  QueryService.ExecuteReader( this.DBConnect, strQueryBuilder.ToString() );
 				
+				if( dr == null )
+					throw new Exception( "Null data reader returned from query" );
+
+				// Scroll thru list returned
+				if( dr.Read() )
+					state = (enuMeetingState) enuMeetingState.Parse( typeof(enuMeetingState), (string) dr[Constants.MTG_STATE], true );
+			}
+			catch( Exception /*e*/ )
+			{
+			}
+			finally
+			{
+				if( dr != null )
+					dr.Close();
+			}
+
+			return state;
+		}
+
 		// Methods that build on basic data access
 		public bool ResumeMeeting( string strMeetingID )
 		{

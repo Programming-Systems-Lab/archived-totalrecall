@@ -99,7 +99,7 @@ namespace PSL.TotalRecall
 			return bRetVal;
 		}
 
-		public bool InMeeting( string strMeetingID, MeetingParticipant participant )
+		public bool IsInMeeting( string strMeetingID, MeetingParticipant participant )
 		{
 			// Quick error checks
 			if( strMeetingID == null || strMeetingID.Length == 0 )
@@ -131,14 +131,15 @@ namespace PSL.TotalRecall
 					throw new Exception( "Null data reader returned from query" );
 
 				// Advance data reader to first record
-				dr.Read();
-
-				int nCount = -1;
-				if( !dr.IsDBNull( 0 ) )
-					nCount = dr.GetInt32( 0 );
-				
-				if( nCount != 0 )
-					bRetVal = true;
+				if( dr.Read() )
+				{
+					int nCount = -1;
+					if( !dr.IsDBNull( 0 ) )
+						nCount = dr.GetInt32( 0 );
+					
+					if( nCount != 0 )
+						bRetVal = true;
+				}
 			}
 			catch( Exception /*e*/ )
 			{
@@ -159,7 +160,7 @@ namespace PSL.TotalRecall
 				throw new ArgumentException( "Invalid meeting ID", "strMeetingID" );
 			
 			// Prevent attempt to add a participant multiple times to a meeting
-			if( InMeeting( strMeetingID, participant ) )
+			if( IsInMeeting( strMeetingID, participant ) )
 				return true;
 
 			// Only one Meeting Organizer per meeting

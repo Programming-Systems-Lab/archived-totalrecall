@@ -33,46 +33,4 @@ namespace PSL.TotalRecall
 		public enuResourceMsgType Type;
 	}
 	
-	public class Resource
-	{
-		private string m_strID = "";
-		private string m_strName = "";
-		private string m_strUrl = "";
-		
-		public string ID
-		{
-			get
-			{ return this.m_strID; }
-			set
-			{
-				if( value == null || value.Length == 0 )
-					return;
-				this.m_strID = value;
-			}
-		}
-
-		public string Name
-		{
-			get
-			{ return this.m_strName; }
-			set
-			{
-				if( value == null || value.Length == 0 )
-					return;
-				this.m_strName = value;
-			}
-		}
-
-		public string Url
-		{
-			get
-			{ return this.m_strUrl; }
-			set
-			{
-				if( value == null || value.Length == 0 )
-					return;
-				this.m_strUrl = value;
-			}
-		}
-	}
 }
