@@ -106,7 +106,7 @@ namespace PSL.Web.Services.DynamicProxy
 			cparams.GenerateInMemory = false;
 			cparams.MainClass = req.ServiceName;
 			cparams.OutputAssembly = strAssemblyFilename;
-			cparams.IncludeDebugInformation = true;
+			cparams.IncludeDebugInformation = false;
 		
 			CompilerResults cr = cc.CompileAssemblyFromFile( cparams, strFilenameSource );
 			

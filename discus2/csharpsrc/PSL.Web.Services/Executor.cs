@@ -211,11 +211,11 @@ namespace PSL.Web.Services.DynamicInvoke
 						throw new Exception( "Expected the body of the SOAP message to be signed" );
 
 					// If the signature verifies set the response cert
-					if( signature.CheckSignature() )
-					{
-						X509SecurityToken tok = (X509SecurityToken) signature.SecurityToken;
-						this.m_settings.ResponseCertificate = tok.Certificate;
-					}
+					if( !signature.CheckSignature() )
+						throw new Exception( "Error verifying digital signature" );
+					
+					X509SecurityToken tok = (X509SecurityToken) signature.SecurityToken;
+					this.m_settings.ResponseCertificate = tok.Certificate;
 				}
 			}		
 			
