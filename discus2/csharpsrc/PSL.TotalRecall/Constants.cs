@@ -26,6 +26,7 @@ namespace PSL.TotalRecall
 		public const string RESOURCE_STATES_TABLENAME		= "ResourceStates";
 		public const string ROLES_TABLENAME					= "Roles";
 		public const string RESOURCE_CATEGORIES_TABLENAME	= "ResourceCategories";
+		public const string CONTACT_CACHE_TABLENAME			= "ContactCache";
 
 		// Column names 
 		// Meetings table
