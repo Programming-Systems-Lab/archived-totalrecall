@@ -10,6 +10,7 @@ namespace PSL.TotalRecall
 	/// </summary>
 	public abstract class Message
 	{
+		protected string m_strMessageID = Guid.NewGuid().ToString();
 		private string m_strMeetingID = "";
 		private string m_strSender = "";
 		private string m_strSenderUrl = "";
@@ -58,6 +59,19 @@ namespace PSL.TotalRecall
 			}
 		}
 		
+		public virtual string MessageID
+		{
+			get
+			{ return this.m_strMessageID; }
+			set
+			{
+				if( value == null || value.Length == 0 )
+					return;
+
+				this.m_strMessageID = value;
+			}
+		}
+
 		public virtual string ToXml()
 		{
 			string strXml = "";

@@ -8,6 +8,8 @@ namespace PSL.TotalRecall
 	public enum enuResourceState
 	{
 		Shared,
-		Recalled
+		Recalled,
+		Updated,
+		Unshared
 	}
 }

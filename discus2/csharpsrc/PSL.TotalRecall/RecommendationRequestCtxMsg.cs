@@ -12,6 +12,26 @@ namespace PSL.TotalRecall
 	{
 		private MeetingRequestMsg m_mtgReq = null;
 
+		public MeetingRequestMsg MeetingRequest
+		{
+			get
+			{ return this.m_mtgReq; }
+			set
+			{
+				if( value == null )
+					return;
+
+				// Set the meeting ID
+				this.MeetingID = value.MeetingID;
+				this.m_mtgReq = value;
+			}
+		}
+		
+		public RecommendationRequestCtxMsg()
+		{
+			this.m_type = enuContextMsgType.RecommendationRequest;
+		}
+
 		public RecommendationRequestCtxMsg( MeetingRequestMsg mtgReq )
 		{
 			if( mtgReq == null )
@@ -35,7 +55,7 @@ namespace PSL.TotalRecall
 		public override enuContextMsgType Type
 		{
 			get
-			{ return this.Type; }
+			{ return this.m_type; }
 			set
 			{
 				if( value == enuContextMsgType.RecommendationRequest )

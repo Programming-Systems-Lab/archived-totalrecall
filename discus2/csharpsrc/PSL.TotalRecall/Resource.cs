@@ -7,7 +7,7 @@ namespace PSL.TotalRecall
 	/// </summary>
 	public class Resource
 	{
-		protected string m_strID = "";
+		protected string m_strID = Guid.NewGuid().ToString();
 		protected string m_strName = "";
 		protected string m_strUrl = "";
 		

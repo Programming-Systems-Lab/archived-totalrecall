@@ -92,6 +92,11 @@
         <Files>
             <Include>
                 <File
+                    RelPath = "AccessPolicy.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "AssemblyInfo.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -158,11 +163,6 @@
                 />
                 <File
                     RelPath = "enuMeetingState.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "enuResourceMsgType.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

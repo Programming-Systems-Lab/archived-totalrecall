@@ -15,10 +15,12 @@ namespace PSL.TotalRecall
 		RecommendationRequest,
 		RecommendationResponse,
 
-		ResourceAdd,
-		ResourceRecall,
-		ResourceAddResponse,
-		ResourceRecallResponse,
+		ResourceShared,
+		ResourceSharedResponse,
+		ResourceRecalled,
+		ResourceRecalledResponse,
+		ResourceUpdated,
+		ResourceUpdatedResponse,
 
 		MeetingEnded,
 		MeetingSuspended,

@@ -14,6 +14,11 @@ namespace PSL.TotalRecall
 		// List of resources
 		private ResourceMsg m_resourceMsg = null;
 
+		public RecommendationResponseCtxMsg()
+		{
+			this.m_type = enuContextMsgType.RecommendationResponse;
+		}
+
 		public RecommendationResponseCtxMsg( RecommendationRequestCtxMsg recReq )
 		{
 			if( recReq == null )
@@ -23,6 +28,21 @@ namespace PSL.TotalRecall
 			this.m_type = enuContextMsgType.RecommendationResponse;
 			this.MeetingID = m_recReq.MeetingID;
 			this.MessageID = m_recReq.MessageID;
+		}
+
+		public RecommendationRequestCtxMsg RecommendationRequest
+		{
+			get
+			{ return this.m_recReq; }
+			set
+			{
+				if( value == null )
+					return;
+				
+				this.m_recReq = value;
+				this.MeetingID = value.MeetingID;
+				this.MessageID = value.MessageID;
+			}
 		}
 
 		public override enuContextMsgType Type
@@ -45,7 +65,7 @@ namespace PSL.TotalRecall
 			return (RecommendationResponseCtxMsg) ser.Deserialize( xt );
 		}
 
-		public ResourceMsg Resource
+		public ResourceMsg ResourceMessage
 		{
 			get
 			{ return this.m_resourceMsg; }

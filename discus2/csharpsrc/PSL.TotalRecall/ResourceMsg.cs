@@ -14,7 +14,6 @@ namespace PSL.TotalRecall
 	{
 		public ResourceMsg()
 		{
-			this.Type = enuResourceMsgType.Add;
 		}
 
 		[System.Xml.Serialization.XmlArrayAttribute("Resources")]
@@ -29,9 +28,5 @@ namespace PSL.TotalRecall
 			xt.Read();
 			return (ResourceMsg) ser.Deserialize( xt );
 		}
-
-		[System.Xml.Serialization.XmlElement("Type")]
-		public enuResourceMsgType Type;
 	}
-	
 }

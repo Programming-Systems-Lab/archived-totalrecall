@@ -9,8 +9,6 @@ namespace PSL.TotalRecall
 	/// </summary>
 	public abstract class ContextMsg:Message
 	{
-		protected XmlElement m_DataElem = null;
-		protected string m_strMessageID = Guid.NewGuid().ToString();
 		protected enuContextMsgType m_type = enuContextMsgType.Unknown;
 		protected string m_strDest = "";
 		protected string m_strDestUrl = "";
@@ -45,19 +43,6 @@ namespace PSL.TotalRecall
 			}
 		}
 
-		public virtual string MessageID
-		{
-			get
-			{ return this.m_strMessageID; }
-			set
-			{
-				if( value == null || value.Length == 0 )
-					return;
-
-				this.m_strMessageID = value;
-			}
-		}
-
 		[System.Xml.Serialization.XmlElement("Type")]
 		public virtual enuContextMsgType Type
 		{
@@ -66,36 +51,6 @@ namespace PSL.TotalRecall
 			set
 			{
 				this.m_type = value; 
-			}
-		}
-		
-		[System.Xml.Serialization.XmlAnyElement()]
-		public virtual XmlElement DataElem
-		{
-			get
-			{ return this.m_DataElem; }
-			set
-			{} // Do nothing setter
-		}
-
-		[System.Xml.Serialization.XmlIgnore()]
-		public virtual string DataXml
-		{
-			get
-			{ 
-				if( this.m_DataElem == null )
-					return "";
-
-				return this.m_DataElem.OuterXml;
-			}
-			set
-			{
-				if( value == null || value.Length == 0 )
-					return;
-
-				XmlDocument innerDoc = new XmlDocument();
-				innerDoc.LoadXml( value );
-				this.m_DataElem = innerDoc.DocumentElement;
 			}
 		}
 	}

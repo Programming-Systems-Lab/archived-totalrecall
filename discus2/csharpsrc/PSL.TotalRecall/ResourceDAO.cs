@@ -198,6 +198,9 @@ namespace PSL.TotalRecall
 			if( res.ID.Length == 0 )
 				res.ID = Guid.NewGuid().ToString();
 			
+			if( this.IsResourceInCatalog( res.ID ) )
+				return res.ID;
+			
 			string strRetVal = "";
 
 			try
@@ -445,6 +448,9 @@ namespace PSL.TotalRecall
 			if( mtgRes == null )
 				throw new ArgumentNullException( "mtgRes", "Invalid resource to add" );
 			
+			if( this.IsResourceInMeeting( mtgRes.ID, strMeetingID ) )
+				return true;
+
 			bool bRetVal = false;
 			try
 			{
@@ -482,6 +488,54 @@ namespace PSL.TotalRecall
 			{
 			}
 			
+			return bRetVal;
+		}
+
+		public bool IsResourceInCatalog( string strResourceID )
+		{
+			// Quick error checks
+			if( strResourceID == null || strResourceID.Length == 0 )
+				throw new ArgumentException( "Invalid resource ID", "strResourceID" );
+
+			bool bRetVal = false;
+			
+			OdbcDataReader dr = null;
+			
+			try
+			{
+				StringBuilder strQueryBuilder = new StringBuilder();
+				strQueryBuilder.Append( " SELECT COUNT(*) " );
+				strQueryBuilder.Append( " FROM " );
+				strQueryBuilder.Append( Constants.RESOURCES_TABLENAME );
+				strQueryBuilder.Append( " WHERE " );
+				strQueryBuilder.Append( Constants.RES_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strResourceID ) + "'" );
+
+				dr =  QueryService.ExecuteReader( this.DBConnect, strQueryBuilder.ToString() );
+				
+				if( dr == null )
+					throw new Exception( "Null data reader returned from query" );
+
+				// Advance data reader to first record
+				if( dr.Read() )
+				{
+					int nCount = -1;
+					if( !dr.IsDBNull( 0 ) )
+						nCount = dr.GetInt32( 0 );
+					
+					if( nCount != 0 )
+						bRetVal = true;
+				}
+			}
+			catch( Exception /*e*/ )
+			{
+			}
+			finally
+			{
+				if( dr != null )
+					dr.Close();
+			}
 			return bRetVal;
 		}
 

@@ -1,6 +1,7 @@
 using System;
 using System.Xml;
 using System.Xml.Serialization;
+using System.Collections;
 
 namespace PSL.TotalRecall
 {
@@ -9,34 +10,31 @@ namespace PSL.TotalRecall
 	/// </summary>
 	public sealed class ResourceCtxMsg : ContextMsg
 	{
-		ResourceMsg m_resMsg = null;
-
-		public ResourceCtxMsg( ResourceMsg resMsg )
+		private ArrayList m_lstResID = new ArrayList();
+		private string m_strNewName = "";
+		private string m_strNewUrl = "";
+		
+		public ResourceCtxMsg()
 		{
-			if( resMsg == null )
-				throw new ArgumentNullException( "resMsg", "Resource message cannot be null" );
-			
-			this.m_resMsg = resMsg;
-
-			if( this.m_resMsg.Type == enuResourceMsgType.Add )
-				this.Type = enuContextMsgType.ResourceAdd;
-			if( this.m_resMsg.Type == enuResourceMsgType.Update )
-				this.Type = enuContextMsgType.ResourceAdd;
-			if( this.m_resMsg.Type == enuResourceMsgType.Recall )
-				this.Type = enuContextMsgType.ResourceRecall;
 		}
 		
-		public ResourceMsg ResourceMessage
+		public void AddResourceID( string strResID )
+		{
+			if( strResID == null || strResID.Length == 0 )
+				return;
+
+			this.m_lstResID.Add( strResID );
+		}
+
+		public void Clear()
+		{
+			this.m_lstResID.Clear();
+		}
+
+		public ArrayList ResourceIDs
 		{
 			get
-			{ return this.m_resMsg; }
-			set
-			{
-				if( value == null )
-					return;
-
-				this.m_resMsg = value;
-			}
+			{ return this.m_lstResID; }
 		}
 
 		public override enuContextMsgType Type
@@ -45,11 +43,35 @@ namespace PSL.TotalRecall
 			{ return this.m_type; }
 			set
 			{
-				if( value == enuContextMsgType.ResourceAdd || value == enuContextMsgType.ResourceRecall )
+				if( ( value == enuContextMsgType.ResourceShared || value == enuContextMsgType.ResourceRecalled ) || value == enuContextMsgType.ResourceUpdated )
 					this.m_type = value;
 			}
 		}
 
+		public string NewName
+		{
+			get
+			{ return this.m_strNewName; }
+			set
+			{
+				if( value == null || value.Length == 0 )
+					return;
+				this.m_strNewName = value;
+			}
+		}
+
+		public string NewUrl
+		{
+			get
+			{ return this.m_strNewUrl; }
+			set
+			{
+				if( value == null || value.Length == 0 )
+					return;
+				this.m_strNewUrl = value;
+			}
+		}
+				
 		public new static ResourceCtxMsg FromXml( string strXml )
 		{
 			System.Type type =  typeof(ResourceCtxMsg);
