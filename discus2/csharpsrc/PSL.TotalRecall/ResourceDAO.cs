@@ -539,7 +539,7 @@ namespace PSL.TotalRecall
 			return bRetVal;
 		}
 
-		public bool UpdateResourceName( string strResourceID, string strName )
+		public bool UpdateResource( string strResourceID, string strName, string url )
 		{
 			// Quick error checks
 			if( strResourceID == null || strResourceID.Length == 0 )
@@ -558,6 +558,10 @@ namespace PSL.TotalRecall
 				strQueryBuilder.Append( Constants.RES_NAME );
 				strQueryBuilder.Append( "=" );
 				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strName ) + "'" );
+				strQueryBuilder.Append( " , " );
+				strQueryBuilder.Append( Constants.RES_URL );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( url ) + "'" );
 				strQueryBuilder.Append( " WHERE " );
 				strQueryBuilder.Append( Constants.RES_ID );
 				strQueryBuilder.Append( "=" );
@@ -578,43 +582,7 @@ namespace PSL.TotalRecall
 			return bRetVal;
 		}
 
-		public bool UpdateResourceUrl( string strResourceID, string strUrl )
-		{
-			// Quick error checks
-			if( strResourceID == null || strResourceID.Length == 0 )
-				throw new ArgumentException( "Invalid resource ID", "strResourceID" );
-			if( strUrl == null || strUrl.Length == 0 )
-				throw new ArgumentException( "Invalid resource Url", "strUrl" );
-
-			bool bRetVal =  false;
-
-			try
-			{
-				StringBuilder strQueryBuilder = new StringBuilder();
-				strQueryBuilder.Append( " UPDATE " );
-				strQueryBuilder.Append( Constants.RESOURCES_TABLENAME );
-				strQueryBuilder.Append( " SET " );
-				strQueryBuilder.Append( Constants.RES_URL );
-				strQueryBuilder.Append( "=" );
-				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strUrl ) + "'" );
-				strQueryBuilder.Append( " WHERE " );
-				strQueryBuilder.Append( Constants.RES_ID );
-				strQueryBuilder.Append( "=" );
-				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strResourceID ) + "'" );
-
-				int nRowsAffected = QueryService.ExecuteNonQuery( this.DBConnect, strQueryBuilder.ToString() );
-				if( nRowsAffected == 1 )
-					bRetVal = true;
-			}
-			catch( Exception /*e*/ )
-			{
-			}
-			finally
-			{
-			}
-
-			return bRetVal;
-		}
+		
 
 		public bool ShareResource( string strResourceID )
 		{
