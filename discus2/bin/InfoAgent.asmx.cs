@@ -50,7 +50,8 @@ namespace TotalRecall
 		private MeetingParticipant me = new MeetingParticipant();
 		private string m_strIAUrl = "/TotalRecall/InfoAgent.asmx?wsdl";
 		private X509Certificate m_signingCert = null;
-		private string m_strProxyCache = "C:\\temp\\PxyCache";
+		private string m_strProxyCache = "PxyCache";
+		private string m_strCurrentDir = "";
 
 		public string ProxyCache
 		{
@@ -113,8 +114,13 @@ namespace TotalRecall
 				this.m_strDBConnect = value;
 			}
 		}
-
 		
+		public string CurrentDir
+		{
+			get
+			{ return this.m_strCurrentDir; }
+		}
+
 		public InfoAgent()
 		{
 			//CODEGEN: This call is required by the ASP.NET Web Services Designer
@@ -128,7 +134,8 @@ namespace TotalRecall
 			// Set current directory
 			FileInfo fInfo = new FileInfo( strLocalPath );
 			System.Environment.CurrentDirectory = fInfo.DirectoryName;
-						
+			this.m_strCurrentDir = fInfo.DirectoryName;
+			
 			// Set the signing key name from the config file
 			this.SigningKeyName = ConfigurationSettings.AppSettings["SigningKeyName"];
 			// Set the proxy cache location
@@ -153,6 +160,8 @@ namespace TotalRecall
 			me.Name = this.SigningKeyName;
 			me.Location = HTTP_PREFIX + GetIPAddress() + this.IAUrl;
 			me.Role = enuMeetingParticipantRole.Participant;
+			// Initialze proxy cache
+			this.InitializeProxyCacheDir();
 		}
 		
 		[WebMethod][SoapRpcMethod]
@@ -1361,7 +1370,42 @@ namespace TotalRecall
 			object objRes = exec.Execute( execCtx );
 		}
 		
-		
+		private bool InitializeProxyCacheDir()
+		{
+			bool bRetVal = false;
+			
+			try
+			{
+				// Determine if directory name of the proxy cache
+				// read from the system config file is NOT Fully 
+				// Quallified i.e <drive letter>:\<path>
+				// If not Fully Qualified then we must prefix
+				// with Current Directory
+				if( this.ProxyCache.IndexOf( ":" ) == -1 )
+				{
+					string strPath = this.CurrentDir;
+					// Append proxy cache sub dir
+					strPath += "\\";
+					strPath += this.ProxyCache;
+					this.ProxyCache = strPath;
+				}
+				
+				// Try to access DirectoryInfo of ProxyCache
+				DirectoryInfo dirInfo = new DirectoryInfo( this.ProxyCache );
+				// If the directory does not exist then try creating it
+				if( !dirInfo.Exists )
+					Directory.CreateDirectory( dirInfo.FullName );
+				
+				bRetVal = true;
+			}
+			catch( System.IO.DirectoryNotFoundException /*e*/ )
+			{
+				Directory.CreateDirectory( this.ProxyCache ); 
+				bRetVal = true;
+			}
+			return bRetVal;
+		}
+
 		/*
 		[SoapDocumentMethod(OneWay=true)]
 		[WebMethod]
