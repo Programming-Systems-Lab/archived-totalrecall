@@ -161,10 +161,23 @@ namespace TotalRecall
 			SoapContext reqCtx = HttpSoapContext.RequestContext;
 			if( reqCtx == null )
 				throw new ApplicationException( "Non-SOAP message!!!" );
-						
-			MeetingRequestMsg req = MeetingRequestMsg.FromXml( strMeetingRequest );
 			
-			MeetingResponseMsg resp = this.JoinMeeting( req, strVouchers, ref reqCtx );
+			// Process the request to ensure the SOAP message
+			// was signed etc. and return the certificate of the signer
+			X509Certificate senderCert = ProcessRequest( ref reqCtx );
+
+			MeetingRequestMsg req = null;
+
+			try
+			{
+				req = MeetingRequestMsg.FromXml( strMeetingRequest );
+			}
+			catch( Exception /*e*/ )
+			{
+				throw new SoapException( "Invalid meeting request", SoapException.ClientFaultCode );
+			}
+			
+			MeetingResponseMsg resp = this.JoinMeeting( req, strVouchers, senderCert );
 			resp.MeetingID = req.MeetingID;
 			resp.Sender = me.Name;
 			resp.SenderUrl = me.Location;
@@ -184,8 +197,27 @@ namespace TotalRecall
 			if( reqCtx == null )
 				throw new ApplicationException( "Non-SOAP message!!!" );
 			
-			MeetingRequestMsg req = MeetingRequestMsg.FromXml( strMeetingRequest );
-			MeetingResponseMsg resp = this.InviteAgent( req, strIAUrl, ref reqCtx );
+			// Process the request to ensure the SOAP message
+			// was signed etc. and return the certificate of the signer
+			X509Certificate senderCert = ProcessRequest( ref reqCtx );
+
+			// Only someone with "my" certificate can direct "me" to invite
+			// another information agent
+			if( !senderCert.Equals( this.m_signingCert ) )
+				throw new SoapException( "Unauthorized operation, invitation directive refused", SoapException.ClientFaultCode );
+
+			MeetingRequestMsg req = null;
+			
+			try
+			{	
+				req = MeetingRequestMsg.FromXml( strMeetingRequest );
+			}
+			catch( Exception /*e*/ )
+			{
+				throw new SoapException( "Invalid meeting request", SoapException.ClientFaultCode );
+			}
+			
+			MeetingResponseMsg resp = this.InviteAgent( req, strIAUrl );
 			
 			// Sign the response
 			SoapContext respCtx = HttpSoapContext.ResponseContext;
@@ -202,9 +234,28 @@ namespace TotalRecall
 			if( reqCtx == null )
 				throw new ApplicationException( "Non-SOAP message!!!" );
 			
-			MeetingRequestMsg req = MeetingRequestMsg.FromXml( strMeetingRequest );
-			string strSignedDoc = this.SignMeetingRequest( req, ref reqCtx );
-			
+			X509Certificate senderCert = ProcessRequest( ref reqCtx );
+
+			MeetingRequestMsg req = null;
+
+			try
+			{
+				req = MeetingRequestMsg.FromXml( strMeetingRequest );
+			}
+			catch( Exception /*e*/ )
+			{
+				throw new SoapException( "Invalid meeting request", SoapException.ClientFaultCode );
+			}
+
+			// Only the meeting organizer can request a participant to sign a 
+			// meeting request
+			ParticipantDAO participDAO = new ParticipantDAO( this.DBConnect );
+			MeetingParticipant organizer = participDAO.GetOrganizer( req.MeetingID );
+			if( organizer == null || organizer.Name != senderCert.GetName() )
+				throw new SoapException( "Signing request refused. Only the meeting organizer can request participants to sign meeting requests", SoapException.ClientFaultCode );
+						
+			string strSignedDoc = this.SignMeetingRequest( req );
+
 			// Sign the response
 			SoapContext respCtx = HttpSoapContext.ResponseContext;
 			this.SignSoapContext( ref respCtx );
@@ -265,10 +316,8 @@ namespace TotalRecall
 
 		// Private support methods
 
-		private string SignMeetingRequest( MeetingRequestMsg req, ref SoapContext reqCtx )
+		private string SignMeetingRequest( MeetingRequestMsg req )
 		{
-			X509Certificate senderCert = ProcessRequest( ref reqCtx );
-			
 			MeetingDAO mtgDAO = new MeetingDAO( this.DBConnect );
 			// If the meeting is new, then we are not a partcipant thus we
 			// refuse to sign the meeting request
@@ -280,13 +329,6 @@ namespace TotalRecall
 			if( mtgDAO.GetMeetingState( req.MeetingID ) == enuMeetingState.Ended )
 				throw new SoapException( "Signing request refused. Reason: Meeting has ended", SoapException.ClientFaultCode );
 
-			// Only the meeting organizer can request a participant to sign a 
-			// meeting request
-			ParticipantDAO participDAO = new ParticipantDAO( this.DBConnect );
-			MeetingParticipant organizer = participDAO.GetOrganizer( req.MeetingID );
-			if( organizer == null || organizer.Name != senderCert.GetName() )
-				throw new SoapException( "Signing request refused. Only the meeting organizer can request participants to sign meeting requests", SoapException.ClientFaultCode );
-			
 			// Get the entire document and hash this
 			byte[] arrData = Encoding.Unicode.GetBytes( req.ToXml() );
 			
@@ -491,12 +533,8 @@ namespace TotalRecall
 			return senderCert;
 		}
 
-		private MeetingResponseMsg JoinMeeting( MeetingRequestMsg req, string strVouchers, ref SoapContext reqCtx )
+		private MeetingResponseMsg JoinMeeting( MeetingRequestMsg req, string strVouchers, X509Certificate senderCert )
 		{
-			// Process the request to ensure the SOAP message
-			// was signed etc. and return the certificate of the signer
-			X509Certificate senderCert = ProcessRequest( ref reqCtx );
-
 			MeetingResponseMsg resp = new MeetingResponseMsg();
 			resp.Value = enuMeetingResponseValue.Accept;
 			
@@ -549,17 +587,8 @@ namespace TotalRecall
 			return resp;
 		}
 		
-		private MeetingResponseMsg InviteAgent( MeetingRequestMsg mtgReq, string strIAUrl, ref SoapContext reqCtx )
+		private MeetingResponseMsg InviteAgent( MeetingRequestMsg mtgReq, string strIAUrl )
 		{
-			// Process the request to ensure the SOAP message
-			// was signed etc. and return the certificate of the signer
-			X509Certificate senderCert = ProcessRequest( ref reqCtx );
-
-			// Only someone with "my" certificate can direct "me" to invite
-			// another information agent
-			if( !senderCert.Equals( this.m_signingCert ) )
-				throw new SoapException( "Unauthorized operation, invitation directive refused", SoapException.ClientFaultCode );
-
 			// Only send out invitations for meetings we are participating in
 			
 			// IA Urls are unique every person has a single IA (per meeting), 
@@ -722,6 +751,34 @@ namespace TotalRecall
 				
 				// Add invitee as a meeting participant				
 				participDAO.AddMeetingParticipant( mtgReq.MeetingID, invitee );
+
+				InfoAgentCtxMsg iaMsg = new InfoAgentCtxMsg();
+				iaMsg.Certificate = joinSettings.ResponseCertificate;
+				iaMsg.MeetingID = mtgReq.MeetingID;
+				iaMsg.ContactID = invitee.Name;
+				iaMsg.InfoAgentUrl = invitee.Location;
+				iaMsg.Sender = me.Name;
+				iaMsg.SenderUrl = me.Location;
+				
+				ContextMsgDAO ctxMsgDAO = new ContextMsgDAO( this.DBConnect );
+
+				// Get the list of participants and send an InfoAgentCtxMsg
+				// to let them know an IA has joined the meeting
+				participIt.Reset();
+				while( participIt.MoveNext() )
+				{
+					MeetingParticipant p = (MeetingParticipant) participIt.Current;
+					// Skip the sender "me"
+					if( p.Name == this.SigningCert.GetName() )
+						continue;
+					
+					// Set the destination for the IA Ctx Msg
+					iaMsg.Dest = p.Name;
+					iaMsg.DestUrl = p.Location;
+					// Save the message we are about to send
+					ctxMsgDAO.SendContextMessage( iaMsg );		
+					this.SendInfoAgentContextUpdate( iaMsg, p.Name, p.Location );
+				}
 			}
 
 			return resp;
@@ -750,31 +807,464 @@ namespace TotalRecall
 			return pxyGen.GenerateAssembly( pxyGenReq );
 		}
 				
+		[SoapDocumentMethod(OneWay=true)]
+		[WebMethod]
+		public void InfoAgentContextUpdate( string strIACtxMsg )
+		{
+			// Accept only SOAP requests
+			SoapContext reqCtx = HttpSoapContext.RequestContext;
+			if( reqCtx == null )
+				throw new ApplicationException( "Non-SOAP message!!!" );
+			
+			if( strIACtxMsg == null || strIACtxMsg.Length == 0 )
+				throw new SoapException( "Invalid Info Agent Context Message", SoapException.ClientFaultCode );
+			
+			// Process the request to ensure the SOAP message
+			// was signed etc. and return the certificate of the signer
+			X509Certificate senderCert = ProcessRequest( ref reqCtx );
+		
+			InfoAgentCtxMsg iaCtxMsg = null;
+			try
+			{	
+				iaCtxMsg = InfoAgentCtxMsg.FromXml( strIACtxMsg );
+			}
+			catch( Exception /*e*/ )
+			{
+				throw new SoapException( "Invalid Info Agent Context Msg", SoapException.ClientFaultCode );
+			}
+
+			ParticipantDAO participDAO = new ParticipantDAO( this.DBConnect );
+			// Only the meeting organizer can send these context messages
+			if( senderCert.GetName() != participDAO.GetOrganizer( iaCtxMsg.MeetingID ).Name )
+				throw new SoapException( "Unauthorized operation, only the Meeting Organizer can send IA Agent Joined/Left context messages", SoapException.ClientFaultCode );
+
+			InfoAgentContextUpdate( iaCtxMsg );
+		}
+		
+		private void InfoAgentContextUpdate( InfoAgentCtxMsg iaCtxMsg )
+		{
+			// Ignore any messages for meetings we are not participating in.
+			// We don't check the meeting status in case we want to resume an
+			// ended meeting at a later date
+			MeetingDAO mtgDAO = new MeetingDAO( this.DBConnect );
+			if( mtgDAO.IsNewMeeting( iaCtxMsg.MeetingID ) )
+				return;
+
+			ParticipantDAO participDAO = new ParticipantDAO( this.DBConnect );
+			// Create a context message response
+			ContextMsgResponse ctxResp = new ContextMsgResponse();
+			ctxResp.MeetingID = iaCtxMsg.MeetingID;
+			ctxResp.MessageID = iaCtxMsg.MessageID;
+			ctxResp.Ack = true;
+			ctxResp.Sender = me.Name;
+			ctxResp.SenderUrl = me.Location;
+			// IA Ctx msgs either IA joined or IA left
+			if( iaCtxMsg.Type == enuContextMsgType.InfoAgentJoined )
+			{
+				// Set the type of the response
+				ctxResp.Type = enuContextMsgType.InfoAgentJoinedResponse;
+				// Add IA as a contact and add their certificate if necessary
+				ContactDAO ctcDAO = new ContactDAO( this.DBConnect );
+				ctcDAO.AddContact( iaCtxMsg.ContactID );
+				ctcDAO.AddContactCertificate( iaCtxMsg.ContactID, iaCtxMsg.Certificate );
+				// Add IA as a meeting participant
+				MeetingParticipant particip = new MeetingParticipant();
+				particip.Name = iaCtxMsg.ContactID;
+				particip.Location = iaCtxMsg.InfoAgentUrl;
+				particip.Role = enuMeetingParticipantRole.Participant;
+				if( !participDAO.IsInfoAgentInMeeting( iaCtxMsg.MeetingID, iaCtxMsg.InfoAgentUrl ) )
+					participDAO.AddMeetingParticipant( iaCtxMsg.MeetingID, particip );
+				else participDAO.UpdateParticipantRole( iaCtxMsg.MeetingID, iaCtxMsg.ContactID, enuMeetingParticipantRole.Participant );
+			}
+			else 
+			{
+				// Set the type of the response
+				ctxResp.Type = enuContextMsgType.InfoAgentLeftResponse;
+				// Update participant role to inactive
+				participDAO.UpdateParticipantRole( iaCtxMsg.MeetingID, iaCtxMsg.ContactID, enuMeetingParticipantRole.Inactive );
+			}
+			
+			// Send the response
+			ContextMsgDAO ctxMsgDAO = new ContextMsgDAO( this.DBConnect );
+			ctxMsgDAO.ReceiveContextMessage( iaCtxMsg, false );
+			// Save the response (ack) if necessary
+			ctxMsgDAO.SendContextMessage( ctxResp );
+			// Send a response (ack) if necessary
+			this.SendContextUpdate( ctxResp, iaCtxMsg.Sender, iaCtxMsg.SenderUrl );
+		}
+
+		[SoapDocumentMethod(OneWay=true)]
+		[WebMethod]
+		public void MeetingContextUpdate( string strMtgCtxMsg )
+		{
+			// Accept only SOAP requests
+			SoapContext reqCtx = HttpSoapContext.RequestContext;
+			if( reqCtx == null )
+				throw new ApplicationException( "Non-SOAP message!!!" );
+			
+			if( strMtgCtxMsg == null || strMtgCtxMsg.Length == 0 )
+				throw new SoapException( "Invalid Meeting Status Context Message", SoapException.ClientFaultCode );
+			
+			// Process the request to ensure the SOAP message
+			// was signed etc. and return the certificate of the signer
+			X509Certificate senderCert = ProcessRequest( ref reqCtx );
+		
+			MeetingStatusCtxMsg mtgCtxMsg = null;
+			try
+			{	
+				mtgCtxMsg = MeetingStatusCtxMsg.FromXml( strMtgCtxMsg );
+			}
+			catch( Exception /*e*/ )
+			{
+				throw new SoapException( "Invalid Meeting Status Context Msg", SoapException.ClientFaultCode );
+			}
+
+			ParticipantDAO participDAO = new ParticipantDAO( this.DBConnect );
+			// Only the meeting organizer can send these context messages
+			if( senderCert.GetName() != participDAO.GetOrganizer( mtgCtxMsg.MeetingID ).Name )
+				throw new SoapException( "Unauthorized operation, only the Meeting Organizer can send IA Agent Joined/Left context messages", SoapException.ClientFaultCode );
+
+			MeetingContextUpdate( mtgCtxMsg );
+		}
+
+		private void MeetingContextUpdate( MeetingStatusCtxMsg mtgCtxMsg )
+		{
+			// Ignore any messages for meetings we are not participating in.
+			// We don't check the meeting status in case we want to resume an
+			// ended meeting at a later date
+			MeetingDAO mtgDAO = new MeetingDAO( this.DBConnect );
+			if( mtgDAO.IsNewMeeting( mtgCtxMsg.MeetingID ) )
+				return;
+
+			ParticipantDAO participDAO = new ParticipantDAO( this.DBConnect );
+			// Create a context message response
+			ContextMsgResponse ctxResp = new ContextMsgResponse();
+			ctxResp.MeetingID = mtgCtxMsg.MeetingID;
+			ctxResp.MessageID = mtgCtxMsg.MessageID;
+			ctxResp.Ack = true;
+			ctxResp.Sender = me.Name;
+			ctxResp.SenderUrl = me.Location;
+				
+			bool bMeetingInactive = false;
+			enuMeetingState meetingState = enuMeetingState.Active;
+			// Set the type of response
+			if( mtgCtxMsg.Type == enuContextMsgType.MeetingEnded )
+			{
+				ctxResp.Type = enuContextMsgType.MeetingEndedResponse;
+				bMeetingInactive = true;
+				meetingState = enuMeetingState.Ended;
+			}
+			else if( mtgCtxMsg.Type == enuContextMsgType.MeetingSuspended )
+			{
+				ctxResp.Type = enuContextMsgType.MeetingSuspendedResponse;
+				bMeetingInactive = true;
+				meetingState = enuMeetingState.Suspended;
+			}
+								
+			if( bMeetingInactive )
+			{
+				// Change the meeting status to ended and mark all participants
+				// as inactive (except the organizer)
+				mtgDAO.UpdateMeetingState( mtgCtxMsg.MeetingID, meetingState );
+					
+				ArrayList lstParticipants = participDAO.GetParticipants( mtgCtxMsg.MeetingID );
+				IEnumerator it = lstParticipants.GetEnumerator();
+				while( it.MoveNext() )
+				{
+					MeetingParticipant p = (MeetingParticipant) it.Current;
+					if( p.Role == enuMeetingParticipantRole.Organizer )
+						continue;
+
+					participDAO.UpdateParticipantRole( mtgCtxMsg.MeetingID, p.Name, enuMeetingParticipantRole.Inactive );
+				}
+			}
+			else if( mtgCtxMsg.Type == enuContextMsgType.MeetingResumed )
+			{
+				// Set the type of response
+				ctxResp.Type = enuContextMsgType.MeetingResumedResponse;
+				// Change meeting state to active
+				mtgDAO.UpdateMeetingState( mtgCtxMsg.MeetingID, meetingState );
+				// Change my status to participant
+				participDAO.UpdateParticipantRole( mtgCtxMsg.MeetingID, me.Name, enuMeetingParticipantRole.Participant );
+			}
+			
+			// Send response
+			ContextMsgDAO ctxMsgDAO = new ContextMsgDAO( this.DBConnect );
+			ctxMsgDAO.ReceiveContextMessage( mtgCtxMsg, false );
+			// Save the response (ack) if necessary
+			ctxMsgDAO.SendContextMessage( ctxResp );
+			// Send a response (ack) if necessary
+			this.SendContextUpdate( ctxResp, mtgCtxMsg.Sender, mtgCtxMsg.SenderUrl );
+		}
+		
+		[SoapDocumentMethod(OneWay=true)]
+		[WebMethod]
+		public void ContextUpdate( string strCtxResponse )
+		{
+			// Accept only SOAP requests
+			SoapContext reqCtx = HttpSoapContext.RequestContext;
+			if( reqCtx == null )
+				throw new ApplicationException( "Non-SOAP message!!!" );
+			
+			if( strCtxResponse == null || strCtxResponse.Length == 0 )
+				throw new SoapException( "Invalid Context Message Response", SoapException.ClientFaultCode );
+			
+			// Process the request to ensure the SOAP message
+			// was signed etc. and return the certificate of the signer
+			X509Certificate senderCert = ProcessRequest( ref reqCtx );
+		
+			ContextMsgResponse respMsg = null;
+			try
+			{	
+				respMsg = ContextMsgResponse.FromXml( strCtxResponse );
+			}
+			catch( Exception /*e*/ )
+			{
+				throw new SoapException( "Invalid Context Message Response", SoapException.ClientFaultCode );
+			}
+
+			// Anyone can send a response, just save it
+			ContextMsgDAO ctxMsgDAO = new ContextMsgDAO( this.DBConnect );
+			ctxMsgDAO.ReceiveContextMessage( respMsg, false );
+		}
+		
+		[SoapDocumentMethod(OneWay=true)]
+		[WebMethod]
+		public void SendContextUpdate( string strCtxResponse, string strContactID, string strIAUrl )
+		{
+			// Accept only SOAP requests
+			SoapContext reqCtx = HttpSoapContext.RequestContext;
+			if( reqCtx == null )
+				throw new ApplicationException( "Non-SOAP message!!!" );
+			
+			if( strCtxResponse == null || strCtxResponse.Length == 0 )
+				throw new SoapException( "Invalid Context Message Response", SoapException.ClientFaultCode );
+			if( strContactID == null || strContactID.Length == 0 )
+				throw new SoapException( "Invalid contact ID", SoapException.ClientFaultCode );
+			if( strIAUrl == null || strIAUrl.Length == 0 )
+				throw new SoapException( "Invalid Info Agent Url", SoapException.ClientFaultCode );
+			
+			X509Certificate senderCert = this.ProcessRequest( ref reqCtx );
+			// Only someone with "my" certificate can direct "me" to create
+			// a meeting
+			if( !senderCert.Equals( this.m_signingCert ) )
+				throw new SoapException( "Unauthorized operation, invitation directive refused", SoapException.ClientFaultCode );			
+			
+			ContextMsgResponse respMsg = null;
+			try
+			{	
+				respMsg = ContextMsgResponse.FromXml( strCtxResponse );
+			}
+			catch( Exception /*e*/ )
+			{
+				throw new SoapException( "Invalid Context Message Response", SoapException.ClientFaultCode );
+			}
+			
+			SendContextUpdate( respMsg, strContactID, strIAUrl );
+		}
+
+		private void SendContextUpdate( ContextMsgResponse respMsg, string strContactID, string strIAUrl )
+		{
+			// Check the contact cache if we have an assembly
+			// then load an invoke
+			// if we don't have one then generate one then invoke
+			ContactCacheDAO ctcCacheDAO = new ContactCacheDAO( this.DBConnect );
+			string strAssembly = ctcCacheDAO.GetContactLocation( strContactID );
+			if( strAssembly == null || strAssembly.Length == 0 )
+			{
+				// Generate a web service proxy
+				ProxyGenRequest pxyGenReq = new ProxyGenRequest();
+				pxyGenReq.ProxyPath = this.ProxyCache;
+				pxyGenReq.ServiceName = INFO_AGENT;
+				pxyGenReq.WsdlUrl = strIAUrl;
+				strAssembly = (string) this.GenerateWebServiceProxy( pxyGenReq );
+				// Update contact cache data
+				ctcCacheDAO.UpdateContactLocation( strContactID, strAssembly );
+			}
+
+			// Create an execution context
+			ExecContext execCtx = new ExecContext();
+			// Get the assembly
+			execCtx.Assembly = strAssembly;
+			// Add the parameters...in this case the meeting request to sign
+			execCtx.AddParameter( Serializer.Serialize( respMsg.ToXml() ) );
+			// Name of method to execute on the remote agent
+			execCtx.MethodName = "ContextUpdate";
+			// Fully qualified name of proxy class
+			execCtx.ServiceName = ProxyGenRequest.DEFAULT_PROXY_NAMESPACE + "." + INFO_AGENT;
+			// Create an executor to do invocation
+			Executor exec = new Executor();
+			// Create a settings instance
+			ExecutorSettings settings = new ExecutorSettings();
+			// DO NOT expect a signed response since we are executing a one way method
+			settings.ExpectSignedResponse = false;
+			// Set the certificate to use to sign the outgoing message
+			settings.SigningCertificate = this.SigningCert;
+			// Set the executor settings instance
+			exec.Settings = settings;
+			// Do invocation (expect null/"" returned)
+			object objRes = exec.Execute( execCtx );
+		}
+		
+		[SoapDocumentMethod(OneWay=true)]
+		[WebMethod]
+		public void SendInfoAgentContextUpdate( string strIACtxMsg, string strContactID, string strIAUrl )
+		{
+			// Accept only SOAP requests
+			SoapContext reqCtx = HttpSoapContext.RequestContext;
+			if( reqCtx == null )
+				throw new ApplicationException( "Non-SOAP message!!!" );
+			
+			if( strIACtxMsg == null || strIACtxMsg.Length == 0 )
+				throw new SoapException( "Invalid Info Agent Context Message", SoapException.ClientFaultCode );
+			if( strContactID == null || strContactID.Length == 0 )
+				throw new SoapException( "Invalid contact ID", SoapException.ClientFaultCode );
+			if( strIAUrl == null || strIAUrl.Length == 0 )
+				throw new SoapException( "Invalid Info Agent Url", SoapException.ClientFaultCode );
+			
+			X509Certificate senderCert = this.ProcessRequest( ref reqCtx );
+			// Only someone with "my" certificate can direct "me" to create
+			// a meeting
+			if( !senderCert.Equals( this.m_signingCert ) )
+				throw new SoapException( "Unauthorized operation, invitation directive refused", SoapException.ClientFaultCode );			
+			
+			InfoAgentCtxMsg iaCtxMsg = null;
+			try
+			{	
+				iaCtxMsg = InfoAgentCtxMsg.FromXml( strIACtxMsg );
+			}
+			catch( Exception /*e*/ )
+			{
+				throw new SoapException( "Invalid Info Agent Context Msg", SoapException.ClientFaultCode );
+			}
+			
+			SendInfoAgentContextUpdate( iaCtxMsg, strContactID, strIAUrl );
+		}
+		
+		private void SendInfoAgentContextUpdate( InfoAgentCtxMsg iaCtxMsg, string strContactID, string strIAUrl )
+		{
+			// Check the contact cache if we have an assembly
+			// then load an invoke
+			// if we don't have one then generate one then invoke
+			ContactCacheDAO ctcCacheDAO = new ContactCacheDAO( this.DBConnect );
+			string strAssembly = ctcCacheDAO.GetContactLocation( strContactID );
+			if( strAssembly == null || strAssembly.Length == 0 )
+			{
+				// Generate a web service proxy
+				ProxyGenRequest pxyGenReq = new ProxyGenRequest();
+				pxyGenReq.ProxyPath = this.ProxyCache;
+				pxyGenReq.ServiceName = INFO_AGENT;
+				pxyGenReq.WsdlUrl = strIAUrl;
+				strAssembly = (string) this.GenerateWebServiceProxy( pxyGenReq );
+				// Update contact cache data
+				ctcCacheDAO.UpdateContactLocation( strContactID, strAssembly );
+			}
+
+			// Create an execution context
+			ExecContext execCtx = new ExecContext();
+			// Get the assembly
+			execCtx.Assembly = strAssembly;
+			// Add the parameters...in this case the meeting request to sign
+			execCtx.AddParameter( Serializer.Serialize( iaCtxMsg.ToXml() ) );
+			// Name of method to execute on the remote agent
+			execCtx.MethodName = "InfoAgentContextUpdate";
+			// Fully qualified name of proxy class
+			execCtx.ServiceName = ProxyGenRequest.DEFAULT_PROXY_NAMESPACE + "." + INFO_AGENT;
+			// Create an executor to do invocation
+			Executor exec = new Executor();
+			// Create a settings instance
+			ExecutorSettings settings = new ExecutorSettings();
+			// DO NOT expect a signed response since we are executing a one way method
+			settings.ExpectSignedResponse = false;
+			// Set the certificate to use to sign the outgoing message
+			settings.SigningCertificate = this.SigningCert;
+			// Set the executor settings instance
+			exec.Settings = settings;
+			// Do invocation (expect null/"" returned)
+			object objRes = exec.Execute( execCtx );
+		}
+
+		[SoapDocumentMethod(OneWay=true)]
+		[WebMethod]
+		public void SendMeetingContextUpdate( string strMtgCtxMsg, string strContactID, string strIAUrl )
+		{
+			// Accept only SOAP requests
+			SoapContext reqCtx = HttpSoapContext.RequestContext;
+			if( reqCtx == null )
+				throw new ApplicationException( "Non-SOAP message!!!" );
+			
+			if( strMtgCtxMsg == null || strMtgCtxMsg.Length == 0 )
+				throw new SoapException( "Meeting Status Context Message", SoapException.ClientFaultCode );
+			if( strContactID == null || strContactID.Length == 0 )
+				throw new SoapException( "Invalid contact ID", SoapException.ClientFaultCode );
+			if( strIAUrl == null || strIAUrl.Length == 0 )
+				throw new SoapException( "Invalid Info Agent Url", SoapException.ClientFaultCode );
+			
+			X509Certificate senderCert = this.ProcessRequest( ref reqCtx );
+			// Only someone with "my" certificate can direct "me" to create
+			// a meeting
+			if( !senderCert.Equals( this.m_signingCert ) )
+				throw new SoapException( "Unauthorized operation, invitation directive refused", SoapException.ClientFaultCode );			
+			
+			MeetingStatusCtxMsg mtgCtxMsg = null;
+			try
+			{	
+				mtgCtxMsg = MeetingStatusCtxMsg.FromXml( strMtgCtxMsg );
+			}
+			catch( Exception /*e*/ )
+			{
+				throw new SoapException( "Meeting Status Context Message", SoapException.ClientFaultCode );
+			}
+			
+			SendMeetingContextUpdate( mtgCtxMsg, strContactID, strIAUrl );
+		}
+
+		private void SendMeetingContextUpdate( MeetingStatusCtxMsg mtgCtxMsg, string strContactID, string strIAUrl )
+		{
+			// Check the contact cache if we have an assembly
+			// then load an invoke
+			// if we don't have one then generate one then invoke
+			ContactCacheDAO ctcCacheDAO = new ContactCacheDAO( this.DBConnect );
+			string strAssembly = ctcCacheDAO.GetContactLocation( strContactID );
+			if( strAssembly == null || strAssembly.Length == 0 )
+			{
+				// Generate a web service proxy
+				ProxyGenRequest pxyGenReq = new ProxyGenRequest();
+				pxyGenReq.ProxyPath = this.ProxyCache;
+				pxyGenReq.ServiceName = INFO_AGENT;
+				pxyGenReq.WsdlUrl = strIAUrl;
+				strAssembly = (string) this.GenerateWebServiceProxy( pxyGenReq );
+				// Update contact cache data
+				ctcCacheDAO.UpdateContactLocation( strContactID, strAssembly );
+			}
+
+			// Create an execution context
+			ExecContext execCtx = new ExecContext();
+			// Get the assembly
+			execCtx.Assembly = strAssembly;
+			// Add the parameters...in this case the meeting request to sign
+			execCtx.AddParameter( Serializer.Serialize( mtgCtxMsg.ToXml() ) );
+			// Name of method to execute on the remote agent
+			execCtx.MethodName = "MeetingContextUpdate";
+			// Fully qualified name of proxy class
+			execCtx.ServiceName = ProxyGenRequest.DEFAULT_PROXY_NAMESPACE + "." + INFO_AGENT;
+			// Create an executor to do invocation
+			Executor exec = new Executor();
+			// Create a settings instance
+			ExecutorSettings settings = new ExecutorSettings();
+			// DO NOT expect a signed response since we are executing a one way method
+			settings.ExpectSignedResponse = false;
+			// Set the certificate to use to sign the outgoing message
+			settings.SigningCertificate = this.SigningCert;
+			// Set the executor settings instance
+			exec.Settings = settings;
+			// Do invocation (expect null/"" returned)
+			object objRes = exec.Execute( execCtx );
+		}
+		
 		/*
 		[SoapDocumentMethod(OneWay=true)]
-		[WebMethod]//[SoapRpcMethod(OneWay=true)]
-		public void SendContextUpdate( ContextMsg ctxMsg, string strContactID )
-		{
-			// Accept only SOAP requests
-			SoapContext ctx = HttpSoapContext.RequestContext;
-			if( ctx == null )
-				throw new ApplicationException( "Non-SOAP message!!!" );
-			
-		}
-		
-		[SoapDocumentMethod(OneWay=true)]
-		[WebMethod]//[SoapRpcMethod(OneWay=true)]
-		public void ContextUpdate( ContextMsg ctxMsg )
-		{
-			// Accept only SOAP requests
-			SoapContext ctx = HttpSoapContext.RequestContext;
-			if( ctx == null )
-				throw new ApplicationException( "Non-SOAP message!!!" );
-			
-		}
-		
-		[SoapDocumentMethod(OneWay=true)]
-		[WebMethod]//[SoapRpcMethod(OneWay=true)]
+		[WebMethod]
 		public void RequestRecommendation( RecommendationRequestMsg recReq )
 		{
 			// Accept only SOAP requests
@@ -785,7 +1275,7 @@ namespace TotalRecall
 		}
 		
 		[SoapDocumentMethod(OneWay=true)]
-		[WebMethod]//[SoapRpcMethod(OneWay=true)]
+		[WebMethod]
 		public void Recommend( ResourceMsg resMsg )
 		{
 			// Accept only SOAP requests
@@ -796,7 +1286,7 @@ namespace TotalRecall
 		}
 		
 		[SoapDocumentMethod(OneWay=true)]
-		[WebMethod]//[SoapRpcMethod(OneWay=true)]
+		[WebMethod]
 		public void AddResources( ResourceMsg resMsg )
 		{
 			// Accept only SOAP requests
@@ -807,7 +1297,7 @@ namespace TotalRecall
 		}
 		
 		[SoapDocumentMethod(OneWay=true)]
-		[WebMethod]//[SoapRpcMethod(OneWay=true)]
+		[WebMethod]
 		public void RecallResources( ResourceMsg resMsg )
 		{
 			// Accept only SOAP requests
@@ -818,7 +1308,7 @@ namespace TotalRecall
 		}
 		
 		[SoapDocumentMethod(OneWay=true)]
-		[WebMethod]//[SoapRpcMethod(OneWay=true)]
+		[WebMethod]
 		public void SendResources( ResourceMsg resMsg )
 		{
 			// Accept only SOAP requests

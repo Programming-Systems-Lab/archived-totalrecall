@@ -8,6 +8,7 @@ drop table AccessPolicies
 drop table Participants
 drop table ContextMessageResponses
 drop table ContextMessagesSent
+drop table ContextMessagesReceived
 drop table ContactCache
 drop table Contacts
 drop table Roles
@@ -143,6 +144,8 @@ create table ContextMessagesSent
 	Constraint PK_ContextMessagesSent Primary key (MTG_ID,CTXMSG_ID,CONTACT_ID),
 	CTXMSG_TYPE nvarchar(100) not null constraint FK_Context_Messages_Sent_CtxMsg_Type Foreign key references ContextMessageTypes(CTXMSG_TYPE) on delete no action,
 	CREATEDATE DATETIME NOT NULL DEFAULT GETDATE(),
+	CONTACT_LOC nvarchar(256) not null check(len(CONTACT_LOC) > 0 ),
+	CTXMSG ntext not null,
 )
 
 -- Table holds a log of context message reponses
@@ -155,6 +158,22 @@ create table ContextMessageResponses
 	Constraint PK_ContextMessageResponses Primary key (MTG_ID,CTXMSG_ID,CONTACT_ID),
 	CTXMSG_TYPE nvarchar(100) not null constraint FK_Context_Message_Responses_CtxMsg_Type Foreign key references ContextMessageTypes(CTXMSG_TYPE) on delete no action,
 	CREATEDATE DATETIME NOT NULL DEFAULT GETDATE(),
+	CONTACT_LOC nvarchar(256) not null check(len(CONTACT_LOC) > 0 ),
+	CTXMSG ntext not null,
+)
+
+create table ContextMessagesReceived
+(
+	MTG_ID nvarchar(100) not null constraint FK_Context_Messages_Received_Meeting_ID Foreign key references Meetings(MTG_ID) on delete cascade,
+	CTXMSG_ID nvarchar(100) not null check(len(CTXMSG_ID) > 0),
+	CONTACT_ID nvarchar(100) not null constraint FK_Context_Messages_Received_Contact_ID Foreign key references Contacts(CONTACT_ID) on delete no action,
+	Constraint PK_ContextMessagesReceived Primary key (CTXMSG_ID),
+	CTXMSG_TYPE nvarchar(100) not null constraint FK_Context_Messages_Received_CtxMsg_Type Foreign key references ContextMessageTypes(CTXMSG_TYPE) on delete no action,
+	CREATEDATE DATETIME NOT NULL DEFAULT GETDATE(),
+	MODIFYDATE DATETIME NOT NULL DEFAULT GETDATE(),
+	CONTACT_LOC nvarchar(256) not null check(len(CONTACT_LOC) > 0 ),
+	CTXMSG ntext not null,
+	NEWMSG bit not null DEFAULT 'true'
 )
 
 -- Create set of triggers for select tables (6)
@@ -231,4 +250,15 @@ create trigger trg_updateAccessPolicies
 on AccessPolicies
 After update as
 Update AccessPolicies set MODIFYDATE=GetDate() where ACCPOL_NAME in (select ACCPOL_NAME from inserted)
+go
+
+-- Create trigger for ContextMessagesReceived
+use TotalRecall
+if exists (select name from sysobjects where name='trg_updateContextMessagesReceived' and type='TR' )
+	drop trigger trg_updateContextMessagesReceived
+go
+create trigger trg_updateContextMessagesReceived
+on ContextMessagesReceived
+After update as
+Update ContextMessagesReceived set MODIFYDATE=GETDATE() where CTXMSG_ID in (select CTXMSG_ID from inserted)
 go
