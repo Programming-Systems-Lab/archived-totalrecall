@@ -158,7 +158,7 @@ namespace PSL.Web.Services.DynamicInvoke
 					reqSoapCtx.Security.Elements.Add( sig );
 
 					// Encrypt SOAP message
-					if( !m_settings.EncryptSoapMessage )
+					if( m_settings.EncryptSoapMessage )
 					{
 						X509SecurityToken encryptionToken = new X509SecurityToken( this.m_settings.EncryptionCertificate );	
 						// Add encryption token to SOAP message header
@@ -186,8 +186,38 @@ namespace PSL.Web.Services.DynamicInvoke
 			// Check for digitally signed response
 			if( this.m_settings.ExpectSignedResponse )
 			{
-			
-			}
+				this.m_settings.ResponseCertificate = null;
+
+				// Get the response certificate
+				// Ask proxy for ResponseContext property
+				PropertyInfo responseSoapContextProp = ProxyType.GetProperty( "ResponseSoapContext" );
+				SoapContext respSoapCtx = null;
+
+				// If property exists
+				if( responseSoapContextProp != null )
+				{
+					// Get property value
+					respSoapCtx = (SoapContext) responseSoapContextProp.GetValue( objProxy, null );
+					// Inspect the response SOAP context
+					if( respSoapCtx.Security.Elements.Count != 1 )
+						throw new Exception( "Expected a single security element" );
+
+					object objElement = respSoapCtx.Security.Elements[0];
+					if( !(objElement is Microsoft.Web.Services.Security.Signature ) )
+						throw new Exception( "Expected a digital signature element" );
+
+					Microsoft.Web.Services.Security.Signature signature = objElement as Microsoft.Web.Services.Security.Signature;
+					if( signature.SignatureOptions != SignatureOptions.IncludeSoapBody )
+						throw new Exception( "Expected the body of the SOAP message to be signed" );
+
+					// If the signature verifies set the response cert
+					if( signature.CheckSignature() )
+					{
+						X509SecurityToken tok = (X509SecurityToken) signature.SecurityToken;
+						this.m_settings.ResponseCertificate = tok.Certificate;
+					}
+				}
+			}		
 			
 			if( objInvokeResult != null )
 			{

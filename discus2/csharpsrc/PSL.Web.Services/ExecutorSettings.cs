@@ -14,6 +14,7 @@ namespace PSL.Web.Services.DynamicInvoke
 		private X509Certificate m_signingCert = null;
 		private X509Certificate m_encCert = null;
 		private bool m_bExpectSignedResponse = false;
+		private X509Certificate m_responseCert = null;
 		
 		public ExecutorSettings()
 		{
@@ -74,6 +75,16 @@ namespace PSL.Web.Services.DynamicInvoke
 
 				this.m_encCert = value;
 				this.m_bEncryptSoapMessage = true;
+			}
+		}
+
+		public X509Certificate ResponseCertificate
+		{
+			get
+			{ return this.m_responseCert; }
+			set
+			{
+				this.m_responseCert = value;
 			}
 		}
 
