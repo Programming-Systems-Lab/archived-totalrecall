@@ -41,9 +41,9 @@ namespace PSL.TotalRecall
 				QueryService.ExecuteNonQuery( this.DBConnect, strQueryBuilder.ToString() );
 				
 			}
-			catch( Exception e )
+			catch( Exception /*e*/ )
 			{
-				Console.WriteLine("Exception in AddCategory(): " + e);
+				// Console.WriteLine("Exception in AddCategory(): " + e);
 			}
 			finally
 			{
@@ -74,9 +74,9 @@ namespace PSL.TotalRecall
 					categories.Add( cat );
 				}
 			}
-			catch( Exception e )
+			catch( Exception /*e*/ )
 			{
-				Console.WriteLine("Exception in GetAllCategories(): " + e);
+				//Console.WriteLine("Exception in GetAllCategories(): " + e);
 			}
 			finally
 			{

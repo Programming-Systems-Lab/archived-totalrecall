@@ -14,7 +14,7 @@ namespace PSL.TotalRecall
 		void SendContextUpdate( ContextMsg ctxMsg, string strContactID );
 		void ContextUpdate( ContextMsg ctxMsg );
 		
-		void RequestRecommendation( RecommendationRequestMsg recReq );
+		void RequestRecommendation( RecommendationRequestCtxMsg recReq );
 		void Recommend( ResourceMsg resMsg );
 		void AddResources( ResourceMsg resMsg );
 		

@@ -208,7 +208,7 @@ namespace PSL.TotalRecall
 						case enuContextMsgType.MeetingSuspended: ctxMsg = MeetingStatusCtxMsg.FromXml( strCtxMsg );
 																 break;
 						
-						case enuContextMsgType.RecommendationRequest: ctxMsg = RecommendationCtxMsg.FromXml( strCtxMsg );
+						case enuContextMsgType.RecommendationRequest: ctxMsg = RecommendationRequestCtxMsg.FromXml( strCtxMsg );
 																	  break;		
 					}
 

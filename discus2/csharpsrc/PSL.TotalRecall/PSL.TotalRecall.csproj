@@ -102,6 +102,16 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Category.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "CategoryDAO.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Constants.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -222,12 +232,12 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "RecommendationCtxMsg.cs"
+                    RelPath = "RecommendationRequestCtxMsg.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "RecommendationRequestMsg.cs"
+                    RelPath = "RecommendationResponseCtxMsg.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

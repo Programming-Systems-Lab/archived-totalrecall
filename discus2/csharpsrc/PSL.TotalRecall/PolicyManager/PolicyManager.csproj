@@ -31,7 +31,7 @@
                     FileAlignment = "4096"
                     IncrementalBuild = "true"
                     Optimize = "false"
-                    OutputPath = "bin\Debug\"
+                    OutputPath = "..\..\..\bin\"
                     RegisterForComInterop = "false"
                     RemoveIntegerChecks = "false"
                     TreatWarningsAsErrors = "false"
@@ -92,8 +92,8 @@
                 />
                 <Reference
                     Name = "PSL.TotalRecall"
-                    Project = "{D0AD373A-6C52-4815-85C2-6EDE8D83AA9A}"
-                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
+                    AssemblyName = "PSL.TotalRecall"
+                    HintPath = "..\..\..\bin\PSL.TotalRecall.dll"
                 />
             </References>
         </Build>

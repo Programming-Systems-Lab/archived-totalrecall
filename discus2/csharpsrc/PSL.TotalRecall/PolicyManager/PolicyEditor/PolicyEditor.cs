@@ -108,7 +108,7 @@ namespace PSL.TotalRecall.PolicyManager
 		/// </summary>
 		private void RefreshResourceCategoryList() 
 		{
-			Resource res = resourcesList.SelectedItem;
+			Resource res = (Resource)resourcesList.SelectedItem;
 			if (res == null) 
 			{
 				return;
@@ -541,7 +541,7 @@ namespace PSL.TotalRecall.PolicyManager
 
 		private void addCategoryToResourceButton_Click(object sender, System.EventArgs e)
 		{
-			Resource resource = resourcesList.SelectedItem;
+			Resource resource = (Resource) resourcesList.SelectedItem;
 			ListBox.SelectedObjectCollection categories = availableCategoriesList.SelectedItems;
 
 			if (resource == null || categories.Count == 0) 
@@ -549,19 +549,15 @@ namespace PSL.TotalRecall.PolicyManager
 				return;
 			}
 
-			IEnumerator e = categories.GetEnumerator();
-			while (e.MoveNext()) 
+			IEnumerator it = categories.GetEnumerator();
+			while (it.MoveNext()) 
 			{
-				Category cat = e.Current;
+				Category cat = (Category) it.Current;
 				resourceDAO.AddResourceToCategory(resource, cat.Name);
 
 				resourceCategoriesList.Items.Add(cat);
 			}
 
 		}
-
-		
-
-		
 	}
 }
