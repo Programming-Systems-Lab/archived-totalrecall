@@ -15,6 +15,44 @@ namespace PSL.TotalRecall
 		{
 		}
 
+		public ArrayList GetAllResources()
+		{
+			// Quick error checks
+			ArrayList lstResources = new ArrayList();
+			OdbcDataReader dr = null;
+						
+			try
+			{
+				string query = "SELECT * FROM " + Constants.RESOURCES_TABLENAME;
+				dr =  QueryService.ExecuteReader( this.DBConnect, query );
+				
+				if( dr == null )
+					throw new Exception( "Null data reader returned from query" );
+
+				// Scroll thru list returned
+				while( dr.Read() )
+				{
+					Resource res =  new Resource();
+					res.ID = (string) dr[Constants.RES_ID];
+					res.Name = (string) dr[Constants.RES_NAME];
+					res.Url = (string) dr[Constants.RES_URL];
+					lstResources.Add( res );
+				}
+			}
+			catch( Exception e )
+			{
+				Console.WriteLine("Error in GetAllResources(): " + e);
+			}
+			finally
+			{
+				if( dr != null )
+					dr.Close();
+			}
+
+			return lstResources;
+		}
+
+
 		public ArrayList GetMeetingResources( string strMeetingID )
 		{
 			// Quick error checks
