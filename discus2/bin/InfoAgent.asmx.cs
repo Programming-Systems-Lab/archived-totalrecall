@@ -409,8 +409,16 @@ namespace TotalRecall
 				bool bVerified = signedXml.CheckSignature();
 
 				if( !bVerified )
-					continue; // Process next signature
+					continue; // Process next signature (ignore invalid signatures)
 			
+				// Validate meeting request hash
+				XmlNode voucherNode = signatureElement["Object"].FirstChild;
+				string strVoucherData = voucherNode.InnerText;
+				// If meeting request hash differs from content of voucher then
+				// ignore this signature
+				if( strVoucherData != strHashedValue )
+					continue;
+				
 				System.Security.Cryptography.Xml.KeyInfo keyInfo = signedXml.KeyInfo;
 				IEnumerator it = keyInfo.GetEnumerator();
 				while( it.MoveNext() )
@@ -422,8 +430,10 @@ namespace TotalRecall
 						continue; // Move on to next clause
 
 					x509Data = (System.Security.Cryptography.Xml.KeyInfoX509Data) obj;
-					// Get the cert
-					X509Certificate cert = (X509Certificate) x509Data.Certificates[0];
+					// Get the System.Security... version of the cert
+					System.Security.Cryptography.X509Certificates.X509Certificate ssCert = (System.Security.Cryptography.X509Certificates.X509Certificate) x509Data.Certificates[0];
+					// Build a Microsoft.Web.Services.Security... version of the cert from the raw ssCert data
+					X509Certificate cert = new X509Certificate( ssCert.GetRawCertData() );
 					// Add the contact ID and the cert
 					results.Add( cert.GetName(), cert );
 				}
@@ -535,13 +545,7 @@ namespace TotalRecall
 			
 			if( !participDAO.IsInMeeting( req.MeetingID, me ) )
 				participDAO.AddMeetingParticipant( req.MeetingID, me );
-
-			// Generate proxies to the organizer and participants
-			// Do this operation using Async
-
-			// Update contact cache 
-			// Do this operation using Async
-			
+		
 			return resp;
 		}
 		
