@@ -51,7 +51,20 @@ namespace PSL.TotalRecall
 			
 		}
 
-		public bool UpdateCategoryPolicy(string categoryName, string policyId) 
+		public bool UpdateCategory(string categoryName, string policyId) 
+		{
+			return UpdateCategory(categoryName, categoryName, policyId);
+		}
+
+		/// <summary>
+		/// Updates the name and policy id for a given category.
+		///
+		/// </summary>
+		/// <param name="categoryName">The current name of the category</param>
+		/// <param name="newName">The new name for the category</param>
+		/// <param name="policyId">The new policyId for the category</param>
+		/// <returns></returns>
+		public bool UpdateCategory(string categoryName, string newName, string policyId) 
 		{
 			//Quick error checks
 			if( categoryName == null || policyId == null)
@@ -63,6 +76,10 @@ namespace PSL.TotalRecall
 				strQueryBuilder.Append( " UPDATE " );
 				strQueryBuilder.Append( Constants.CATEGORIES_TABLENAME );
 				strQueryBuilder.Append( " SET " );
+				strQueryBuilder.Append( Constants.CAT_NAME );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( newName ) + "'" );
+				strQueryBuilder.Append( "," );
 				strQueryBuilder.Append( Constants.ACCPOL_ID );
 				strQueryBuilder.Append( "=" );
 				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( policyId ) + "'" );
