@@ -43,21 +43,22 @@ namespace PSL.TotalRecall.PolicyManager
 			// TODO: load policy reference from DB
 			try 
 			{
-				string policyDoc = policyDAO.GetPolicy(expression.policyId);
+				AccessPolicy policy = policyDAO.GetPolicy(expression.policyId);
 
-				if (policyDoc == null || policyDoc.Length == 0) 
+				if (policy == null) 
 				{
 					return new EvaluationResult(TAG, false, "Policy with id " + expression.policyId + " not found in database.");
 				}
 				else 
 				{
+					string policyDoc = policy.Document;
 					EvaluationResult result = PolicyManager.evaluatePolicy(policyDoc, context);
 					ArrayList list = new ArrayList();
 					list.Add(result);
 					return new EvaluationResult(TAG, result.Result, "Evaluated policy id " + expression.policyId, list);
 				}
 			}
-			catch (PolicyManagerException /*e*/) 
+			catch (PolicyManagerException e) 
 			{
 				return new EvaluationResult(TAG, false, "Could not evaluate policy id " + expression.policyId + ": " + e);
 			}

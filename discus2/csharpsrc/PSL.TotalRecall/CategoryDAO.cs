@@ -15,7 +15,7 @@ namespace PSL.TotalRecall
 		{
 		}
 
-		public void AddCategory(Category category) 
+		public bool AddCategory(Category category) 
 		{
 			//Quick error checks
 			if( category == null )
@@ -38,19 +38,52 @@ namespace PSL.TotalRecall
 				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( category.PolicyID ) + "'" );
 				strQueryBuilder.Append( ")" );
 
-				QueryService.ExecuteNonQuery( this.DBConnect, strQueryBuilder.ToString() );
+				int nRowsAffected = QueryService.ExecuteNonQuery( this.DBConnect, strQueryBuilder.ToString() );
+				return ( nRowsAffected == 1 );
 				
 			}
-			catch( Exception /*e*/ )
+			catch( Exception e )
 			{
-				// Console.WriteLine("Exception in AddCategory(): " + e);
+				Console.WriteLine("Exception in AddCategory(): " + e);
+				return false;
 			}
-			finally
-			{
-			}
-
+			
 			
 		}
+
+		public bool UpdateCategoryPolicy(string categoryName, string policyId) 
+		{
+			//Quick error checks
+			if( categoryName == null || policyId == null)
+				throw new ArgumentNullException( "category and policyId cannot be null" );
+			
+			try
+			{
+				StringBuilder strQueryBuilder = new StringBuilder();
+				strQueryBuilder.Append( " UPDATE " );
+				strQueryBuilder.Append( Constants.CATEGORIES_TABLENAME );
+				strQueryBuilder.Append( " SET " );
+				strQueryBuilder.Append( Constants.ACCPOL_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( policyId ) + "'" );
+				strQueryBuilder.Append( " WHERE " );
+				strQueryBuilder.Append( Constants.CAT_NAME );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( categoryName ) + "'" );
+				
+				int nRowsAffected = QueryService.ExecuteNonQuery( this.DBConnect, strQueryBuilder.ToString() );
+				return ( nRowsAffected == 1 );
+				
+			}
+			catch( Exception e )
+			{
+				Console.WriteLine("Exception in AddCategory(): " + e);
+				return false;
+			}
+			
+			
+		}
+
 
 		public ArrayList GetAllCategories()
 		{
@@ -74,9 +107,9 @@ namespace PSL.TotalRecall
 					categories.Add( cat );
 				}
 			}
-			catch( Exception /*e*/ )
+			catch( Exception e )
 			{
-				//Console.WriteLine("Exception in GetAllCategories(): " + e);
+				Console.WriteLine("Exception in GetAllCategories(): " + e);
 			}
 			finally
 			{

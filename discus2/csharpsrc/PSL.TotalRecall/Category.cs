@@ -49,6 +49,16 @@ namespace PSL.TotalRecall
 			return name;
 		}
 
+		public override Boolean Equals(object o) 
+		{
+			Category other = (Category) o;
+			return other.Name.Equals(Name) && other.PolicyID.Equals(PolicyID);
+		}
+
+		public override int GetHashCode() 
+		{
+			return Name.GetHashCode() + 29 * PolicyID.GetHashCode();
+		}
 
 	}
 }

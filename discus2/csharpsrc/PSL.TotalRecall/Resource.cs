@@ -49,9 +49,21 @@ namespace PSL.TotalRecall
 
 		public override string ToString()
 		{
-			return m_strName;
+			return m_strName + " [url=" + m_strUrl + ", id=" + m_strID + "]";
 
 		}
 
+		public override bool Equals(object o) 
+		{
+			Resource other = (Resource) o;
+			return other.ID.Equals(ID) && 
+				other.Name.Equals(Name) &&
+				other.Url.Equals(Url);
+		}
+
+		public override int GetHashCode() 
+		{
+			return ID.GetHashCode() + 29 * Name.GetHashCode() + 29 * Url.GetHashCode();
+		}
 	}
 }
