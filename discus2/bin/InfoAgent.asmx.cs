@@ -1552,31 +1552,38 @@ namespace TotalRecall
 				return;
 
 			ParticipantDAO participDAO = new ParticipantDAO( this.DBConnect );
+			ResourceDAO resDAO = new ResourceDAO( this.DBConnect );
 			MeetingParticipant organizer = participDAO.GetOrganizer( recRespMsg.MeetingID );
-			// I'm the organizer, just add resources to meeting resources table
-			if( organizer.Name == me.Name )
+			
+			IEnumerator it = recRespMsg.ResourceMessage.m_lstResources.GetEnumerator();
+			while( it.MoveNext() )
 			{
-				ResourceDAO resDAO = new ResourceDAO( this.DBConnect );
-				IEnumerator it = recRespMsg.ResourceMessage.m_lstResources.GetEnumerator();
-				while( it.MoveNext() )
-				{
-					Resource res = (Resource) it.Current;
-					MeetingResource mtgRes = new MeetingResource( res, recRespMsg.MeetingID, me.Name );
-					// Here is where we would ask the policy manager if it's ok to
-					// share this resource
-					resDAO.AddMeetingResource( mtgRes.MeetingID, mtgRes );
-				}
+				Resource res = (Resource) it.Current;
+				MeetingResource mtgRes = new MeetingResource( res, recRespMsg.MeetingID, me.Name );
+				// Here is where we would ask the policy manager if it's ok to
+				// share this resource
+				resDAO.AddMeetingResource( mtgRes.MeetingID, mtgRes );
 			}
-			else
+			
+			// If I'm not the organizer then I have to send a context message
+			// to the organizer
+			if( organizer.Name != me.Name )
 			{
 				// Create a context msg 
 				ResourceCtxMsg resCtxMsg = new ResourceCtxMsg();
 				resCtxMsg.Type = enuContextMsgType.ResourceShared;
 				resCtxMsg.MessageID = recRespMsg.ResourceMessage.MessageID;
-				IEnumerator it = recRespMsg.ResourceMessage.m_lstResources.GetEnumerator();
-				while( it.MoveNext() )
+				// Set the destination
+				resCtxMsg.Dest = organizer.Name;
+				resCtxMsg.DestUrl = organizer.Location;
+				resCtxMsg.Sender = me.Name;
+				resCtxMsg.SenderUrl = me.Location;
+				resCtxMsg.MeetingID = recRespMsg.MeetingID;
+	
+				IEnumerator resIt = recRespMsg.ResourceMessage.m_lstResources.GetEnumerator();
+				while( resIt.MoveNext() )
 				{
-					Resource res = (Resource) it.Current;
+					Resource res = (Resource) resIt.Current;
 					resCtxMsg.AddResourceID( res.ID );
 				}
 
@@ -1586,6 +1593,9 @@ namespace TotalRecall
 					ctxMsgDAO.SendContextMessage( resCtxMsg );
 				}
 
+				// Set sender info on inner resource message
+				recRespMsg.ResourceMessage.Sender = me.Name;
+				recRespMsg.ResourceMessage.SenderUrl = me.Location;
 				// Send resources to meeting organizer, the organizer is responsible
 				// for showing these resources (here we actually push the resources 
 				// using DIME)
