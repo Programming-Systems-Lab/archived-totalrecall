@@ -72,6 +72,21 @@
                     AssemblyName = "System.Xml"
                     HintPath = "..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.0.3705\System.XML.dll"
                 />
+                <Reference
+                    Name = "Microsoft.Web.Services"
+                    AssemblyName = "Microsoft.Web.Services"
+                    HintPath = "..\..\..\..\..\..\Program Files\Microsoft WSE\v1.0.2312\Microsoft.Web.Services.dll"
+                />
+                <Reference
+                    Name = "Microsoft.Data.Odbc"
+                    AssemblyName = "Microsoft.Data.Odbc"
+                    HintPath = "..\..\..\..\..\..\Program Files\Microsoft.Net\Odbc.Net\Microsoft.Data.Odbc.dll"
+                />
+                <Reference
+                    Name = "Interop.CAPICOM"
+                    AssemblyName = "Interop.CAPICOM"
+                    HintPath = "..\..\bin\Interop.CAPICOM.dll"
+                />
             </References>
         </Build>
         <Files>
@@ -82,7 +97,47 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "BaseDAO.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Constants.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ContactDAO.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "ContextMsg.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "enuContextMsgType.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "enuMeetingParticipantRole.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "enuMeetingResponseValue.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "enuMeetingState.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "enuResourceMsgType.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -93,6 +148,11 @@
                 />
                 <File
                     RelPath = "ICustodianInternal.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "MeetingDAO.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -108,6 +168,16 @@
                 />
                 <File
                     RelPath = "Message.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ParticipantDAO.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "QueryService.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

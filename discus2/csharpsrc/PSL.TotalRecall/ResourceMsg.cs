@@ -32,13 +32,6 @@ namespace PSL.TotalRecall
 		[System.Xml.Serialization.XmlElement("Type")]
 		public enuResourceMsgType Type;
 	}
-
-	public enum enuResourceMsgType
-	{
-		Add,
-		Recall,
-		Update
-	}
 	
 	public class Resource
 	{

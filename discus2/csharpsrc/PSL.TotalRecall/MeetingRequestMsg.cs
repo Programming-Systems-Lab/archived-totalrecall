@@ -81,11 +81,4 @@ namespace PSL.TotalRecall
 			}
 		}
 	}
-
-	public enum enuMeetingParticipantRole
-	{
-		Organizer,
-		Participant,
-		Inactive
-	}
 }

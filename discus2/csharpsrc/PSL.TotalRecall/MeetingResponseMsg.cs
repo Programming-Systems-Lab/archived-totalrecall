@@ -28,10 +28,4 @@ namespace PSL.TotalRecall
 		[System.Xml.Serialization.XmlElement( "Value" )]
 		public enuMeetingResponseValue Value;
 	}
-
-	public enum enuMeetingResponseValue
-	{
-		Accept,
-		Refuse
-	}
 }

@@ -48,12 +48,4 @@ namespace PSL.TotalRecall
 			}
 		}
 	}
-
-	public enum enuContextMsgType
-	{
-		IAJoined,
-		IALeft,
-		IALeaving,
-		Unknown
-	}
 }
