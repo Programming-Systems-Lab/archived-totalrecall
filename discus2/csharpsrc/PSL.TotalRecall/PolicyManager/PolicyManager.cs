@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Collections;
+using System.Configuration;
 using System.Reflection;
 using System.Xml;
 using System.Xml.Serialization;
@@ -18,7 +19,7 @@ namespace PSL.TotalRecall.PolicyManager
 		/// <summary>
 		/// The assembly used to load plugin classes
 		/// </summary>
-		private static Assembly pluginAssembly = Assembly.GetExecutingAssembly();	// TODO: might need to modify this
+		//private static Assembly pluginAssembly = Assembly.GetExecutingAssembly();	// TODO: might need to modify this
 		
 		/// <summary>
 		/// The serializer to use for deserializing policy documents
@@ -52,6 +53,7 @@ namespace PSL.TotalRecall.PolicyManager
 		{
 			// initialize table 
 			// TODO: probably read this from some config file
+			// use ConfigurationSettings.AppSettings["foo"];
 			evaluatorNames = new Hashtable();
 			
 			evaluatorNames.Add("http://psl.cs.columbia.edu/discus2/All",
@@ -116,7 +118,9 @@ namespace PSL.TotalRecall.PolicyManager
 			else 
 			{
 
-				object o = pluginAssembly.CreateInstance(className, true);
+				//object o = pluginAssembly.CreateInstance(className, true);
+				Type type = Type.GetType(className);
+				object o = Activator.CreateInstance(type);
 				if (o == null || !(o is IPolicyEvaluator))
 				{
 					result = new EvaluationResult(TAG, false, "Could not load plugin for " + element.LocalName);

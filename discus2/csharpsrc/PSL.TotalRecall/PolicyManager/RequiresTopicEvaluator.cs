@@ -43,7 +43,7 @@ namespace PSL.TotalRecall.PolicyManager
 				isMatch = context.Topic.ToLower().Equals(expression.Topic.ToLower());
 			}
 
-			return new EvaluationResult(TAG, isMatch, "Context topic matches \"" + expression.Topic + "\" + 
+			return new EvaluationResult(TAG, isMatch, "Context topic matches \"" + expression.Topic + "\"" + 
 				(expression.IsRegexSpecified && expression.IsRegex ? " (regex match)" : ""));
 		}
 

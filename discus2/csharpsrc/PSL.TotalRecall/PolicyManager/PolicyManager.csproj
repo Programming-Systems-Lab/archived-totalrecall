@@ -7,7 +7,7 @@
     >
         <Build>
             <Settings
-                ApplicationIcon = "App.ico"
+                ApplicationIcon = ""
                 AssemblyKeyContainerName = ""
                 AssemblyName = "PolicyManager"
                 AssemblyOriginatorKeyFile = ""
@@ -96,10 +96,6 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "App.ico"
-                    BuildAction = "Content"
-                />
-                <File
                     RelPath = "AssemblyInfo.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -177,12 +173,22 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Test.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "TestPolicy.xml"
                     BuildAction = "Content"
                 />
                 <File
                     RelPath = "Topic.xml"
                     BuildAction = "Content"
+                />
+                <File
+                    RelPath = "Util.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
                 />
             </Include>
         </Files>
