@@ -15,7 +15,7 @@ namespace PSL.TotalRecall
 		{
 		}
 
-		public string AddNewPolicy( string strPolicyName, string strPolicy )
+		public AccessPolicy AddNewPolicy( string strPolicyName, string strPolicy )
 		{
 			// Quick error checks
 			if( strPolicy == null || strPolicy.Length == 0 )
@@ -23,7 +23,7 @@ namespace PSL.TotalRecall
 			if( strPolicyName == null || strPolicyName.Length == 0 )
 				throw new ArgumentException( "Invalid policy name", "strPolicyName" );
 			
-			string strRetVal = "";
+			AccessPolicy policy = null;
 			string strPolicyID = Guid.NewGuid().ToString();
 			try
 			{
@@ -48,7 +48,12 @@ namespace PSL.TotalRecall
 
 				int nRowsAffected = QueryService.ExecuteNonQuery( this.DBConnect, strQueryBuilder.ToString() );
 				if( nRowsAffected == 1 )
-					strRetVal = strPolicyID;
+				{
+					policy = new AccessPolicy();
+					policy.Name = strPolicyName;
+					policy.Id = strPolicyID;
+					policy.Document = strPolicy;
+				}
 			}
 			catch( Exception /*e*/ )
 			{
@@ -57,7 +62,7 @@ namespace PSL.TotalRecall
 			{
 			}
 			
-			return strRetVal;
+			return policy;
 		}
 
 		public bool UpdatePolicy( string strPolicyID, string strPolicy )
@@ -99,20 +104,20 @@ namespace PSL.TotalRecall
 			return bRetVal;
 		}
 
-		public string GetPolicy( string strPolicyID )
+		public AccessPolicy GetPolicy( string strPolicyID )
 		{
 			// Quick error checks
 			if( strPolicyID == null || strPolicyID.Length == 0 )
 				throw new ArgumentException( "Invalid policy ID", "strPolicyID" );
 			
 			OdbcDataReader dr = null;
-			string strPolicy = "";
+			AccessPolicy policy = null;
 						
 			try
 			{
 				StringBuilder strQueryBuilder = new StringBuilder();
 				strQueryBuilder.Append( " SELECT " );
-				strQueryBuilder.Append( Constants.ACCPOL_DOC );
+				strQueryBuilder.Append( "*" );
 				strQueryBuilder.Append( " FROM " );
 				strQueryBuilder.Append( Constants.ACCESS_POLICIES_TABLENAME);
 				strQueryBuilder.Append( " WHERE " );
@@ -126,8 +131,14 @@ namespace PSL.TotalRecall
 					throw new Exception( "Null data reader returned from query" );
 
 				// Take first entry returned
-				if( dr.Read() )
-					strPolicy = (string) dr[Constants.ACCPOL_DOC];
+				if( dr.Read() ) 
+				{
+					policy = new AccessPolicy();
+					policy.Name = (string) dr[Constants.ACCPOL_NAME];
+					policy.Id = (string) dr[Constants.ACCPOL_ID];
+					policy.Document = (string) dr[Constants.ACCPOL_DOC];
+				}
+					
 			}
 			catch( Exception /*e*/ )
 			{
@@ -138,48 +149,53 @@ namespace PSL.TotalRecall
 					dr.Close();
 			}
 			
-			return strPolicy;
+			return policy;
 		}
-		
-		public bool AddPolicyCategory( string strPolicyID, string strCategoryName )
-		{
-			// Quick error checks
-			if( strCategoryName == null || strCategoryName.Length == 0 )
-				throw new ArgumentException( "Invalid category name", "strCategory" );
-			if( strPolicyID == null || strPolicyID.Length == 0 )
-				throw new ArgumentException( "Invalid policy ID", "strPolicyID" );
 
-			bool bRetVal = false;
-			
+		public ArrayList GetAllPolicies()
+		{
+			OdbcDataReader dr = null;
+			AccessPolicy policy = null;
+				
+			ArrayList policies = new ArrayList();
+
 			try
 			{
 				StringBuilder strQueryBuilder = new StringBuilder();
-				strQueryBuilder.Append( " INSERT INTO " );
-				strQueryBuilder.Append( Constants.CATEGORIES_TABLENAME );
-				strQueryBuilder.Append( "(" );
-				strQueryBuilder.Append( Constants.CAT_NAME );
-				strQueryBuilder.Append( "," );
-				strQueryBuilder.Append( Constants.ACCPOL_ID );
-				strQueryBuilder.Append( ")" );
-				strQueryBuilder.Append( " VALUES " );
-				strQueryBuilder.Append( "(" );
-				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strCategoryName ) + "'" );
-				strQueryBuilder.Append( "," );
-				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strPolicyID ) + "'" );
-				strQueryBuilder.Append( ")" );
+				strQueryBuilder.Append( " SELECT " );
+				strQueryBuilder.Append( "*" );
+				strQueryBuilder.Append( " FROM " );
+				strQueryBuilder.Append( Constants.ACCESS_POLICIES_TABLENAME);
 				
-				int nRowsAffected = QueryService.ExecuteNonQuery( this.DBConnect, strQueryBuilder.ToString() );
-				if( nRowsAffected == 1 )
-					bRetVal = true;
+				dr =  QueryService.ExecuteReader( this.DBConnect, strQueryBuilder.ToString() );
+				
+				if( dr == null )
+					throw new Exception( "Null data reader returned from query" );
+
+				while ( dr.Read() ) 
+				{
+					policy = new AccessPolicy();
+					policy.Name = (string) dr[Constants.ACCPOL_NAME];
+					policy.Id = (string) dr[Constants.ACCPOL_ID];
+					policy.Document = (string) dr[Constants.ACCPOL_DOC];
+
+					policies.Add(policy);
+				}
+					
 			}
-			catch( Exception /*e*/ )
+			catch( Exception e )
 			{
+				Console.WriteLine("Exception in GetAllPolicies(): " + e);
 			}
 			finally
 			{
+				if( dr != null )
+					dr.Close();
 			}
-		
-			return bRetVal;
+			
+			return policies;
 		}
+		
+		
 	}
 }
