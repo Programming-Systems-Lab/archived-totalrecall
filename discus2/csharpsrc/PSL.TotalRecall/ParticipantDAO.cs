@@ -99,6 +99,61 @@ namespace PSL.TotalRecall
 			return bRetVal;
 		}
 
+		public bool IsInfoAgentInMeeting( string strMeetingID, string strIAUrl )
+		{
+			// Quick error checks
+			if( strMeetingID == null || strMeetingID.Length == 0 )
+				throw new ArgumentException( "Invalid meeting ID", "strMeetingID" );
+			// Quick error checks
+			if( strIAUrl == null || strIAUrl.Length == 0 )
+				throw new ArgumentException( "Invalid Info Agent Url", "strIAUrl" );
+
+			bool bRetVal = false;
+			OdbcDataReader dr = null;
+			
+			try
+			{
+				StringBuilder strQueryBuilder = new StringBuilder();
+				strQueryBuilder.Append( " SELECT COUNT(*) " );
+				strQueryBuilder.Append( " FROM " );
+				strQueryBuilder.Append( Constants.PARTICIPANTS_TABLENAME );
+				strQueryBuilder.Append( " WHERE " );
+				strQueryBuilder.Append( Constants.MTG_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strMeetingID ) + "'" );
+				strQueryBuilder.Append( " AND " );
+				strQueryBuilder.Append( Constants.PART_LOC );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strIAUrl ) + "'" );
+
+				dr =  QueryService.ExecuteReader( this.DBConnect, strQueryBuilder.ToString() );
+				
+				if( dr == null )
+					throw new Exception( "Null data reader returned from query" );
+
+				// Advance data reader to first record
+				if( dr.Read() )
+				{
+					int nCount = -1;
+					if( !dr.IsDBNull( 0 ) )
+						nCount = dr.GetInt32( 0 );
+					
+					if( nCount != 0 )
+						bRetVal = true;
+				}
+			}
+			catch( Exception /*e*/ )
+			{
+			}
+			finally
+			{
+				if( dr != null )
+					dr.Close();
+			}
+
+			return bRetVal;			
+		}
+
 		public bool IsInMeeting( string strMeetingID, MeetingParticipant participant )
 		{
 			// Quick error checks
@@ -207,6 +262,62 @@ namespace PSL.TotalRecall
 			}
 
 			return bRetVal;
+		}
+
+		public MeetingParticipant GetInfoAgent( string strMeetingID, string strInfoAgentUrl )
+		{
+			// Quick error checks
+			if( strMeetingID == null || strMeetingID.Length == 0 )
+				throw new ArgumentException( "Invalid meeting ID", "strMeetingID" );
+			
+			MeetingParticipant particip = null;
+			OdbcDataReader dr = null;
+						
+			try
+			{
+				StringBuilder strQueryBuilder = new StringBuilder();
+				strQueryBuilder.Append( " SELECT " );
+				strQueryBuilder.Append( Constants.CONTACT_ID );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.PART_ROLE );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.PART_LOC );
+				strQueryBuilder.Append( " FROM " );
+				strQueryBuilder.Append( Constants.PARTICIPANTS_TABLENAME );
+				strQueryBuilder.Append( " WHERE " );
+				strQueryBuilder.Append( Constants.MTG_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strMeetingID ) + "'" );
+				strQueryBuilder.Append( " AND " );
+				strQueryBuilder.Append( Constants.PART_LOC );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strInfoAgentUrl ) + "'" );
+
+				dr =  QueryService.ExecuteReader( this.DBConnect, strQueryBuilder.ToString() );
+				
+				if( dr == null )
+					throw new Exception( "Null data reader returned from query" );
+
+				// Take first entry returned
+				if( dr.Read() )
+				{
+					particip = new MeetingParticipant();
+					particip.Location = (string) dr[Constants.PART_LOC];
+					particip.Name = (string) dr[Constants.CONTACT_ID];
+					particip.Role = (enuMeetingParticipantRole) enuMeetingParticipantRole.Parse( typeof(enuMeetingParticipantRole), (string) dr[Constants.PART_ROLE] , true );
+				}
+					
+			}
+			catch( Exception /*e*/ )
+			{
+			}
+			finally
+			{
+				if( dr != null )
+					dr.Close();
+			}
+
+			return particip;
 		}
 
 		public MeetingParticipant GetOrganizer( string strMeetingID )
