@@ -1,14 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<Policy xmlns="http://psl.cs.columbia.edu/discus2/policy" 
+<Policy xmlns="http://psl.cs.columbia.edu/discus2/Policy" 
 		xmlns:all="http://psl.cs.columbia.edu/discus2/All"
-		xmlns:rp="http://psl.cs.columbia.edu/discus2/RequiresParticipants">
+		xmlns:rp="http://psl.cs.columbia.edu/discus2/RequiresParticipants"
+		xmlns:rt="http://psl.cs.columbia.edu/discus2/RequiresTopic">
 	<all:All>
 		<rp:RequiresParticipants>
 			<rp:Participant>joe</rp:Participant>
 			<rp:Participant>bob</rp:Participant>
 		</rp:RequiresParticipants>
-		<rp:RequiresParticipants>
-			<rp:Participant>alice</rp:Participant>
-		</rp:RequiresParticipants>
+		<rt:RequiresTopic IsRegex="true">
+			<rt:Topic>your topic|topic</rt:Topic>
+		</rt:RequiresTopic>
 	</all:All>
 </Policy>

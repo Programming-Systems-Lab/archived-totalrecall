@@ -77,11 +77,6 @@
         <Files>
             <Include>
                 <File
-                    RelPath = "All.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
                     RelPath = "All.xsd"
                     BuildAction = "Content"
                 />
@@ -92,6 +87,11 @@
                 />
                 <File
                     RelPath = "AllEvaluator.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "AllSchema.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -158,7 +158,30 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "RequiresTopic.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "RequiresTopic.xsd"
+                    BuildAction = "Content"
+                />
+                <File
+                    RelPath = "RequiresTopic.xsx"
+                    DependentUpon = "RequiresTopic.xsd"
+                    BuildAction = "None"
+                />
+                <File
+                    RelPath = "RequiresTopicEvaluator.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "TestPolicy.xml"
+                    BuildAction = "Content"
+                />
+                <File
+                    RelPath = "Topic.xml"
                     BuildAction = "Content"
                 />
             </Include>

@@ -16,7 +16,7 @@ namespace PSL.TotalRecall.PolicyManager
 
 		public EvaluationResult evaluateExpression(XmlElement expressionDoc, IContext context) 
 		{
-
+			
 			// first deserialize expression into a All instance
 			All expression = null;
 			try 

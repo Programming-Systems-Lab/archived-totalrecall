@@ -17,9 +17,14 @@ namespace PSL.TotalRecall.PolicyManager
 
 		private static IEnumerable EMPTY_ENUMERABLE = new ArrayList();
 
-		public EvaluationResult(string tag, bool result, string message) : this(tag, result, message, EMPTY_ENUMERABLE)
+		public EvaluationResult(string tag, bool result) : 
+			this(tag, result, null) 
 		{
-			
+		}
+
+		public EvaluationResult(string tag, bool result, string message) : 
+			this(tag, result, message, EMPTY_ENUMERABLE)
+		{
 		}
 		
 		public EvaluationResult(string tag, bool result, string message, IEnumerable nestedResults) 
@@ -94,14 +99,15 @@ namespace PSL.TotalRecall.PolicyManager
 
 		private void dumpResults(TextWriter writer, string prefix) 
 		{
-			writer.WriteLine(prefix + "Tag: " + tag + ". Result: " + result + ": " + message);
+			writer.WriteLine(prefix + "Tag: " + tag);
+			writer.WriteLine(prefix + "Evaluated to " + result + ": " + message + "\n");
 			
 			if (nestedResults.GetEnumerator().MoveNext()) 
 			{
 				writer.WriteLine("------------------------ nested results ------------------------");
 				foreach (EvaluationResult evalResult in nestedResults) 
 				{
-					evalResult.dumpResults(writer, prefix + "\t");
+					evalResult.dumpResults(writer, prefix + "  ");
 				}
 				writer.WriteLine("----------------------------------------------------------------");
 			}

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xs:schema id="RequiresTopic" elementFormDefault="qualified" xmlns="http://psl.cs.columbia.edu/discus2/RequiresTopic" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://psl.cs.columbia.edu/discus2/RequiresTopic">
+	<xs:element name="RequiresTopic">
+		<xs:complexType>
+			<xs:sequence maxOccurs="1" minOccurs="1">
+				<xs:element name="Topic" type="xs:string" />
+			</xs:sequence>
+			<xs:attribute name="IsRegex" type="xs:boolean" />
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

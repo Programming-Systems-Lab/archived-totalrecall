@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<xs:schema id="Policy" elementFormDefault="qualified" xmlns="http://psl.cs.columbia.edu/discus2/policy" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://psl.cs.columbia.edu/discus2/policy">
+<xs:schema id="Policy" elementFormDefault="qualified" xmlns="http://psl.cs.columbia.edu/discus2/Policy" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://psl.cs.columbia.edu/discus2/Policy">
 	<xs:element name="Policy">
 		<xs:complexType>
 			<xs:sequence>

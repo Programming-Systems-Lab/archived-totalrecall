@@ -16,12 +16,19 @@ namespace PSL.TotalRecall.PolicyManager {
     
     
     /// <remarks/>
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://psl.cs.columbia.edu/discus2/Policy")]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://psl.cs.columbia.edu/discus2/Policy", IsNullable=false)]
-    public class Policy {
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://psl.cs.columbia.edu/discus2/RequiresTopic")]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://psl.cs.columbia.edu/discus2/RequiresTopic", IsNullable=false)]
+    public class RequiresTopic {
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlAnyElementAttribute()]
-        public System.Xml.XmlElement Any;
+        public string Topic;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public bool IsRegex;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool IsRegexSpecified;
     }
 }

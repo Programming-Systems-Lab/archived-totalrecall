@@ -60,6 +60,8 @@ namespace PSL.TotalRecall.PolicyManager
 			evaluatorNames.Add("http://psl.cs.columbia.edu/discus2/RequiresParticipants",
 				"PSL.TotalRecall.PolicyManager.RequiresParticipantsEvaluator");
 
+			evaluatorNames.Add("http://psl.cs.columbia.edu/discus2/RequiresTopic",
+				"PSL.TotalRecall.PolicyManager.RequiresTopicEvaluator");
 		}
 
 		/// <summary>
@@ -175,7 +177,7 @@ namespace PSL.TotalRecall.PolicyManager
 		{
 			get 
 			{
-				return "MyTopic";
+				return "My Topic";
 			}
 		}
 	}
