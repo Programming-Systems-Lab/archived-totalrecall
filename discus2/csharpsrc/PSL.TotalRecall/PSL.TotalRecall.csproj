@@ -69,7 +69,7 @@
                 />
                 <Reference
                     Name = "System.XML"
-                    AssemblyName = "System.XML"
+                    AssemblyName = "System.Xml"
                     HintPath = "..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.0.3705\System.XML.dll"
                 />
             </References>
@@ -78,6 +78,11 @@
             <Include>
                 <File
                     RelPath = "AssemblyInfo.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ContextMsg.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -97,6 +102,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "MeetingResponseMsg.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Message.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -107,7 +117,7 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "RecommendationResponseMsg.cs"
+                    RelPath = "ResourceMsg.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

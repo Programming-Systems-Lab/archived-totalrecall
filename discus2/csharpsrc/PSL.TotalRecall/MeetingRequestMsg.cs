@@ -16,6 +16,8 @@ namespace PSL.TotalRecall
 		[System.Xml.Serialization.XmlArrayItem(typeof(MeetingParticipant),ElementName="Participant")]
 		public ArrayList m_lstParticipants = new ArrayList();
 		
+		private string m_strMeetingTopic = "";
+
 		public MeetingRequestMsg()
 		{
 		}
@@ -28,6 +30,20 @@ namespace PSL.TotalRecall
 			xt.Read();
 			return (MeetingRequestMsg) ser.Deserialize( xt );
 		}
+
+		[System.Xml.Serialization.XmlElement( "MeetingTopic", typeof(string) )]
+		public string MeetingTopic
+		{
+			get
+			{ return this.m_strMeetingTopic; }
+			set
+			{
+				if( value == null || value.Length == 0 )
+					return;
+
+				this.m_strMeetingTopic = value;
+			}
+		}
 	}
 	
 	[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.psl.cs.columbia.edu/TotalRecall")]
@@ -35,8 +51,9 @@ namespace PSL.TotalRecall
 	public class MeetingParticipant
 	{
 		private string m_strName = "";
-		private string m_strUri = "";
-		private string m_strRole = "";
+		private string m_strLoc = "";
+		[System.Xml.Serialization.XmlElement( "Role" )]
+		public enuMeetingParticipantRole Role = enuMeetingParticipantRole.Participant;
 
 		[System.Xml.Serialization.XmlElement( "Name", typeof(string) )]
 		public string Name
@@ -51,30 +68,24 @@ namespace PSL.TotalRecall
 			}
 		}
 
-		[System.Xml.Serialization.XmlElement( "Uri", typeof(string) )]
-		public string Uri
+		[System.Xml.Serialization.XmlElement( "Location", typeof(string) )]
+		public string Location
 		{
 			get
-			{ return this.m_strUri; }
+			{ return this.m_strLoc; }
 			set
 			{
 				if( value == null || value.Length == 0 )
 					return;
-				this.m_strUri = value;
+				this.m_strLoc = value;
 			}
 		}
+	}
 
-		[System.Xml.Serialization.XmlElement( "Role", typeof(string) )]
-		public string Role
-		{
-			get
-			{ return this.m_strRole; }
-			set
-			{
-				if( value == null || value.Length == 0 )
-					return;
-				this.m_strRole = value;
-			}
-		}
+	public enum enuMeetingParticipantRole
+	{
+		Organizer,
+		Participant,
+		Inactive
 	}
 }

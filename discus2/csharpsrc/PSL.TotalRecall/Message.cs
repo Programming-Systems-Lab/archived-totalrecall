@@ -11,9 +11,8 @@ namespace PSL.TotalRecall
 	public abstract class Message
 	{
 		private string m_strMeetingID = "";
-		private string m_strMeetingTopic = "";
 		private string m_strSender = "";
-		private string m_strSenderUri = "";
+		private string m_strSenderUrl = "";
 
 		public Message()
 		{
@@ -32,16 +31,16 @@ namespace PSL.TotalRecall
 			}
 		}
 
-		[System.Xml.Serialization.XmlElement( "SenderUri", typeof(string) )]
-		public string SenderUri
+		[System.Xml.Serialization.XmlElement( "SenderUrl", typeof(string) )]
+		public string SenderUrl
 		{
 			get
-			{ return this.m_strSenderUri; }
+			{ return this.m_strSenderUrl; }
 			set
 			{
 				if( value == null || value.Length == 0 )
 					return;
-				this.m_strSenderUri = value;
+				this.m_strSenderUrl = value;
 			}
 		}
 		
@@ -59,20 +58,6 @@ namespace PSL.TotalRecall
 			}
 		}
 		
-		[System.Xml.Serialization.XmlElement( "MeetingTopic", typeof(string) )]
-		public string MeetingTopic
-		{
-			get
-			{ return this.m_strMeetingTopic; }
-			set
-			{
-				if( value == null || value.Length == 0 )
-					return;
-
-				this.m_strMeetingTopic = value;
-			}
-		}
-
 		public virtual string ToXml()
 		{
 			string strXml = "";

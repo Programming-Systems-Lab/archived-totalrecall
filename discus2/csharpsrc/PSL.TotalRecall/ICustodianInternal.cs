@@ -8,5 +8,15 @@ namespace PSL.TotalRecall
 	/// </summary>
 	public interface ICustodianInternal
 	{
+		MeetingResponseMsg JoinMeeting( MeetingRequestMsg req, string strVouchers );
+		void InviteAgent( MeetingRequestMsg req, string strContactID );
+		string SignMeetingRequest( MeetingRequestMsg req );
+		void SendContextUpdate( ContextMsg ctxMsg, string strContactID );
+		void ContextUpdate( ContextMsg ctxMsg );
+		void RequestRecommendation( RecommendationRequestMsg recReq );
+		void Recommend( ResourceMsg resMsg );
+		void AddResources( ResourceMsg resMsg );
+		void RecallResources( ResourceMsg resMsg );
+		void SendResources( ResourceMsg resMsg );
 	}
 }
