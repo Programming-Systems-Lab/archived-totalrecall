@@ -122,6 +122,16 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "ContextMsgDAO.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ContextMsgResponse.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "enuContextMsgType.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -162,6 +172,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "InfoAgentCtxMsg.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "MeetingDAO.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -178,6 +193,11 @@
                 />
                 <File
                     RelPath = "MeetingResponseMsg.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "MeetingStatusCtxMsg.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -202,12 +222,22 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "RecommendationCtxMsg.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "RecommendationRequestMsg.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
                     RelPath = "Resource.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ResourceCtxMsg.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

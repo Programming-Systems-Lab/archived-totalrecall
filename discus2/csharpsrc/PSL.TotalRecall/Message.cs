@@ -19,7 +19,7 @@ namespace PSL.TotalRecall
 		}
 
 		[System.Xml.Serialization.XmlElement( "Sender", typeof(string) )]
-		public string Sender
+		public virtual string Sender
 		{
 			get
 			{ return this.m_strSender; }
@@ -32,7 +32,7 @@ namespace PSL.TotalRecall
 		}
 
 		[System.Xml.Serialization.XmlElement( "SenderUrl", typeof(string) )]
-		public string SenderUrl
+		public virtual string SenderUrl
 		{
 			get
 			{ return this.m_strSenderUrl; }
@@ -45,7 +45,7 @@ namespace PSL.TotalRecall
 		}
 		
 		[System.Xml.Serialization.XmlElement( "MeetingID", typeof(string) )]
-		public string MeetingID
+		public virtual string MeetingID
 		{
 			get
 			{ return this.m_strMeetingID; }

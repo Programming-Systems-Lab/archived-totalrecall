@@ -17,6 +17,7 @@ namespace PSL.TotalRecall
 		public const string CONTACTS_TABLENAME				= "Contacts";
 		public const string CONTEXT_MSG_RESPONSES_TABLENAME = "ContextMessageResponses";
 		public const string CONTEXT_MSGS_SENT_TABLENAME		= "ContextMessagesSent";
+		public const string CONTEXT_MSGS_RECEIVED_TABLENAME = "ContextMessagesReceived";
 		public const string CONTEXT_MSG_TYPES_TABLENAME		= "ContextMessageTypes";
 		public const string MEETING_RESOURCES_TABLENAME		= "MeetingResources";
 		public const string MEETINGS_TABLENAME				= "Meetings";
@@ -52,6 +53,14 @@ namespace PSL.TotalRecall
 		public const string RES_OWNER	= "RES_OWNER";
 
 		public const string CAT_NAME	= "CAT_NAME";
+
+		// Context message table column names
+		public const string CREATEDATE	= "CREATEDATE";
+		public const string CTXMSG_ID	= "CTXMSG_ID";
+		public const string CTXMSG_TYPE	= "CTXMSG_TYPE";
+		public const string CTXMSG		= "CTXMSG";
+		public const string NEWMSG		= "NEWMSG";
+		public const string CONTACT_LOC	= "CONTACT_LOC";
 
 		public Constants()
 		{}

@@ -471,9 +471,53 @@ namespace PSL.TotalRecall
 			return lstParticipants;
 		}
 
-		public bool UpdateParticpantLocation( string strContactID, string strLocation )
+		public bool UpdateParticipantRole( string strMeetingID, string strContactID, enuMeetingParticipantRole role )
 		{
 			// Quick error checks
+			if( strMeetingID == null || strMeetingID.Length == 0 )
+				throw new ArgumentException( "Invalid meeting ID", "strMeetingID" );
+			if( strContactID == null || strContactID.Length == 0 )
+				throw new ArgumentException( "Invalid contact ID", "strContactID" );
+		
+			bool bRetVal = false;
+			
+			try
+			{
+				StringBuilder strQueryBuilder = new StringBuilder();
+				strQueryBuilder.Append( " UPDATE " );
+				strQueryBuilder.Append( Constants.PARTICIPANTS_TABLENAME );
+				strQueryBuilder.Append( " SET " );
+				strQueryBuilder.Append( Constants.PART_ROLE );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + role.ToString() + "'" );
+				strQueryBuilder.Append( " WHERE " );
+				strQueryBuilder.Append( Constants.CONTACT_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strContactID ) + "'" );
+				strQueryBuilder.Append( " AND " );
+				strQueryBuilder.Append( Constants.MTG_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strMeetingID ) + "'" );
+				
+				int nRowsAffected = QueryService.ExecuteNonQuery( this.DBConnect, strQueryBuilder.ToString() );
+				if( nRowsAffected >= 1 )
+					bRetVal = true;
+			}
+			catch( Exception /*e*/ )
+			{
+			}
+			finally
+			{
+			}
+
+			return bRetVal;			
+		}
+		
+		public bool UpdateParticpantLocation( string strMeetingID, string strContactID, string strLocation )
+		{
+			// Quick error checks
+			if( strMeetingID == null || strMeetingID.Length == 0 )
+				throw new ArgumentException( "Invalid meeting ID", "strMeetingID" );
 			if( strContactID == null || strContactID.Length == 0 )
 				throw new ArgumentException( "Invalid contact ID", "strContactID" );
 			if( strLocation == null || strLocation.Length == 0 )
@@ -494,6 +538,10 @@ namespace PSL.TotalRecall
 				strQueryBuilder.Append( Constants.CONTACT_ID );
 				strQueryBuilder.Append( "=" );
 				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strContactID ) + "'" );
+				strQueryBuilder.Append( " AND " );
+				strQueryBuilder.Append( Constants.MTG_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strMeetingID ) + "'" );
 				
 				int nRowsAffected = QueryService.ExecuteNonQuery( this.DBConnect, strQueryBuilder.ToString() );
 				if( nRowsAffected >= 1 )
