@@ -11,6 +11,8 @@ namespace PSL.TotalRecall.PolicyManager
 	{
 		/// <summary>
 		/// Evaluates the given expression with respect to the given context.
+		/// NOTE: implementations of this method should be thread-safe! That is,
+		/// one instance could be shared among several threads.
 		/// </summary>
 		EvaluationResult evaluateExpression(XmlElement expr, IContext context);	
 		

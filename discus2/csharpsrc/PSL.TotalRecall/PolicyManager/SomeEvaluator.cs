@@ -48,7 +48,8 @@ namespace PSL.TotalRecall.PolicyManager
 				}
 			}
 
-			return new EvaluationResult(TAG, false, "Not enough expressions evaluated true", results);
+			return new EvaluationResult(TAG, false, "Not enough expressions evaluated true. " + 
+				"Required " + expression.min + ", got " + count, results);
 			
 		}
 	

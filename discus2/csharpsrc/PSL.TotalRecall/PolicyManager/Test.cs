@@ -25,7 +25,10 @@ namespace PSL.TotalRecall.PolicyManager
 			Policy policy = new Policy();
 			policy.Any = Util.getXmlElement(all);
 
-			Util.serialize(policy, Console.Out);
+			StreamWriter writer = new StreamWriter("testpolicy2.xml");
+
+			Util.serialize(policy, writer);
+			writer.Close();
 			Console.Out.WriteLine("done");
 				
 

@@ -12,7 +12,7 @@ namespace PSL.TotalRecall.PolicyManager
 	{
 		public const string TAG = "RequiresTopic";
 
-		private XmlSerializer serializer = new XmlSerializer(typeof(RequiresTopic));
+		private static XmlSerializer serializer = new XmlSerializer(typeof(RequiresTopic));
 
 		public EvaluationResult evaluateExpression(XmlElement expressionDoc, IContext context) 
 		{
@@ -43,7 +43,8 @@ namespace PSL.TotalRecall.PolicyManager
 				isMatch = context.Topic.ToLower().Equals(expression.Topic.ToLower());
 			}
 
-			string match = "\"" + expression.Topic + "\"" + (expression.IsRegexSpecified && expression.IsRegex ? " (regex match)" : "");
+			string match = "\"" + expression.Topic + "\" " + 
+				(expression.IsRegexSpecified && expression.IsRegex ? "(regex match)" : "(exact match)");
 			if (isMatch) 
 			{
 				return new EvaluationResult(TAG, true, "Context topic matches " + match);
