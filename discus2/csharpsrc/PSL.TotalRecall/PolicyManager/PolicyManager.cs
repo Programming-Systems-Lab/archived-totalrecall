@@ -29,7 +29,9 @@ namespace PSL.TotalRecall.PolicyManager
 		/// A table of mappings between namespaces of policy expression and the corresponding 
 		/// IPolicyEvaluator class name
 		/// </summary>
-		private Hashtable evaluatorNames;
+		private static Hashtable evaluatorNames;
+
+		public const string TAG = "Policy";
 
 		/// <summary>
 		/// Used for testing. Pass a policy XML file as the first argument.
@@ -46,11 +48,15 @@ namespace PSL.TotalRecall.PolicyManager
 			debug("done");
 		}
 
-		public PolicyManager() 
+		static PolicyManager() 
 		{
 			// initialize table 
 			// TODO: probably read this from some config file
 			evaluatorNames = new Hashtable();
+			
+			evaluatorNames.Add("http://psl.cs.columbia.edu/discus2/All",
+				"PSL.TotalRecall.PolicyManager.AllEvaluator");
+			
 			evaluatorNames.Add("http://psl.cs.columbia.edu/discus2/RequiresParticipants",
 				"PSL.TotalRecall.PolicyManager.RequiresParticipantsEvaluator");
 
@@ -87,65 +93,41 @@ namespace PSL.TotalRecall.PolicyManager
 			{
 				throw new PolicyManagerException("Could not deserialize policy document", e);
 			}
-				
-			// evaluate policy expressions
-			// TODO: as of now, doing an All regardless
-			ArrayList results = new ArrayList();
-			foreach (XmlElement element in policy.Item.Expressions) 
-			{
-				EvaluationResult result = null;
+			
+			// now evaluate the one element in this policy
+			return invokeEvaluator(policy.Any, context);
+			
+		}
+		
+		public static EvaluationResult invokeEvaluator(XmlElement element, IContext context) 
+		{
+			EvaluationResult result = null;
 
-				// get class that corresponds to this element
-				// we use the namespace attribute for this tag
-				
-				// /*old*/ string nameSpace = element.Attributes["namespace"].Value;
-				// /*old*/ string className = (nameSpace != null ? nameSpace + "." : "") + element.LocalName;
-				
-				string className = (string) evaluatorNames[element.NamespaceURI];
-				if (className == null) 
+			// get class that corresponds to this element
+			// we use the namespace attribute for this tag
+			string className = (string) evaluatorNames[element.NamespaceURI];
+			if (className == null) 
+			{
+				result = new EvaluationResult(TAG, false, "Evaluator class not found for tag " +
+					element.LocalName + " in namespace " + element.NamespaceURI);
+			}
+			else 
+			{
+
+				object o = pluginAssembly.CreateInstance(className, true);
+				if (o == null || !(o is IPolicyEvaluator))
 				{
-					result = new EvaluationResult(false, "Evaluator class not found for tag " +
-						element.LocalName + " in namespace " + element.NamespaceURI);
+					result = new EvaluationResult(TAG, false, "Could not load plugin for " + element.LocalName);
 				}
 				else 
 				{
-
-					object o = pluginAssembly.CreateInstance(className, true);
-					if (o == null || !(o is IPolicyEvaluator))
-					{
-						result = new EvaluationResult(false, "Could not load plugin for " + element.LocalName);
-					}
-					else 
-					{
-						// invoke the evaluator!
-						IPolicyEvaluator evaluator = (IPolicyEvaluator) o;
-						result = evaluator.evaluateExpression(element, context);
-					}
-				}
-				
-				results.Add(result);
-				
-				if (!result.Result) 
-				{
-					return new EvaluationResult(false, "At least one expression evaluated false", results);
+					// invoke the evaluator!
+					IPolicyEvaluator evaluator = (IPolicyEvaluator) o;
+					result = evaluator.evaluateExpression(element, context);
 				}
 			}
 
-			return new EvaluationResult(true, "All expressions evaluated true", results);
-
-		}
-		
-		private static void test1(String file) 
-		{
-			XmlSerializer ser = new XmlSerializer(typeof(Policy));
-			StreamReader reader = new StreamReader(file);
-			Policy policy = (Policy) ser.Deserialize(reader);
-			XmlElement[] expressions = policy.Item.Expressions;
-			foreach (XmlElement e in expressions) 
-			{
-				debug(e.ToString());
-			}
-
+			return result;
 		}
 
 		private static void debug(Object o) 
@@ -202,7 +184,7 @@ namespace PSL.TotalRecall.PolicyManager
 	{
 		public EvaluationResult evaluateExpression(XmlElement expression, IContext context) 
 		{
-			return new EvaluationResult(true, "");
+			return new EvaluationResult("test", true, "");
 		}
 	}
 	
