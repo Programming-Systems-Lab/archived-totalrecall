@@ -39,9 +39,9 @@ namespace PSL.TotalRecall
 					lstResources.Add( res );
 				}
 			}
-			catch( Exception e )
+			catch( Exception /*e*/ )
 			{
-				Console.WriteLine("Error in GetAllResources(): " + e);
+				// Console.WriteLine("Error in GetAllResources(): " + e);
 			}
 			finally
 			{
@@ -51,7 +51,146 @@ namespace PSL.TotalRecall
 
 			return lstResources;
 		}
+		
+		public ArrayList GetSharedResources( string strMeetingID )
+		{
+			// Quick error checks
+			if( strMeetingID == null || strMeetingID.Length == 0 )
+				throw new ArgumentException( "Invalid meeting ID", "strMeetingID" );
+			
+			ArrayList lstResources = new ArrayList();
+			OdbcDataReader dr = null;
+						
+			try
+			{
+				StringBuilder strQueryBuilder = new StringBuilder();
+				strQueryBuilder.Append( " SELECT " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_ID );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_OWNER );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_STATE );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.RESOURCES_TABLENAME + "." + Constants.RES_URL );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.RESOURCES_TABLENAME + "." + Constants.RES_NAME );
+				strQueryBuilder.Append( " FROM " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.RESOURCES_TABLENAME );
+				strQueryBuilder.Append( " WHERE " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.MTG_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strMeetingID ) + "'" );
+				strQueryBuilder.Append( " AND " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( Constants.RESOURCES_TABLENAME + "." + Constants.RES_ID );
+				strQueryBuilder.Append( " AND " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_STATE );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( enuResourceState.Shared.ToString() ) + "'" );
 
+				dr =  QueryService.ExecuteReader( this.DBConnect, strQueryBuilder.ToString() );
+				
+				if( dr == null )
+					throw new Exception( "Null data reader returned from query" );
+
+				// Scroll thru list returned
+				while( dr.Read() )
+				{
+					Resource res = new Resource();
+					res.ID = (string) dr[Constants.RES_ID];
+					res.Name = (string) dr[Constants.RES_NAME];
+					res.Url = (string) dr[Constants.RES_URL];
+					string strOwner = (string) dr[Constants.RES_OWNER];
+
+					MeetingResource mtgRes =  new MeetingResource( res, strMeetingID, strOwner );
+					mtgRes.State = (enuResourceState) enuResourceState.Parse( typeof(enuResourceState), (string) dr[Constants.RES_STATE], true );
+					lstResources.Add( mtgRes );
+				}
+			}
+			catch( Exception /*e*/ )
+			{
+			}
+			finally
+			{
+				if( dr != null )
+					dr.Close();
+			}
+
+			return lstResources;
+		}
+			
+		public ArrayList GetRecalledResources( string strMeetingID )
+		{
+			// Quick error checks
+			if( strMeetingID == null || strMeetingID.Length == 0 )
+				throw new ArgumentException( "Invalid meeting ID", "strMeetingID" );
+			
+			ArrayList lstResources = new ArrayList();
+			OdbcDataReader dr = null;
+						
+			try
+			{
+				StringBuilder strQueryBuilder = new StringBuilder();
+				strQueryBuilder.Append( " SELECT " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_ID );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_OWNER );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_STATE );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.RESOURCES_TABLENAME + "." + Constants.RES_URL );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.RESOURCES_TABLENAME + "." + Constants.RES_NAME );
+				strQueryBuilder.Append( " FROM " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.RESOURCES_TABLENAME );
+				strQueryBuilder.Append( " WHERE " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.MTG_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strMeetingID ) + "'" );
+				strQueryBuilder.Append( " AND " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( Constants.RESOURCES_TABLENAME + "." + Constants.RES_ID );
+				strQueryBuilder.Append( " AND " );
+				strQueryBuilder.Append( Constants.MEETING_RESOURCES_TABLENAME + "." + Constants.RES_STATE );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( enuResourceState.Recalled.ToString() ) + "'" );
+
+				dr =  QueryService.ExecuteReader( this.DBConnect, strQueryBuilder.ToString() );
+				
+				if( dr == null )
+					throw new Exception( "Null data reader returned from query" );
+
+				// Scroll thru list returned
+				while( dr.Read() )
+				{
+					Resource res = new Resource();
+					res.ID = (string) dr[Constants.RES_ID];
+					res.Name = (string) dr[Constants.RES_NAME];
+					res.Url = (string) dr[Constants.RES_URL];
+					string strOwner = (string) dr[Constants.RES_OWNER];
+
+					MeetingResource mtgRes =  new MeetingResource( res, strMeetingID, strOwner );
+					mtgRes.State = (enuResourceState) enuResourceState.Parse( typeof(enuResourceState), (string) dr[Constants.RES_STATE], true );
+					lstResources.Add( mtgRes );
+				}
+			}
+			catch( Exception /*e*/ )
+			{
+			}
+			finally
+			{
+				if( dr != null )
+					dr.Close();
+			}
+
+			return lstResources;
+		}
 
 		public ArrayList GetMeetingResources( string strMeetingID )
 		{
@@ -96,12 +235,14 @@ namespace PSL.TotalRecall
 				// Scroll thru list returned
 				while( dr.Read() )
 				{
-					MeetingResource mtgRes =  new MeetingResource();
-					mtgRes.ID = (string) dr[Constants.RES_ID];
-					mtgRes.Name = (string) dr[Constants.RES_NAME];
-					mtgRes.Owner = (string) dr[Constants.RES_OWNER];
+					Resource res = new Resource();
+					res.ID = (string) dr[Constants.RES_ID];
+					res.Name = (string) dr[Constants.RES_NAME];
+					res.Url = (string) dr[Constants.RES_URL];
+					string strOwner = (string) dr[Constants.RES_OWNER];
+
+					MeetingResource mtgRes =  new MeetingResource( res, strMeetingID, strOwner );
 					mtgRes.State = (enuResourceState) enuResourceState.Parse( typeof(enuResourceState), (string) dr[Constants.RES_STATE], true );
-					mtgRes.Url = (string) dr[Constants.RES_URL];
 					lstResources.Add( mtgRes );
 				}
 			}
@@ -322,9 +463,9 @@ namespace PSL.TotalRecall
 					categories.Add( cat );
 				}
 			}
-			catch( Exception e )
+			catch( Exception /*e*/ )
 			{
-				Console.WriteLine("Exception in GetResourceCategories(): " + e);
+				// Console.WriteLine("Exception in GetResourceCategories(): " + e);
 			}
 			finally
 			{

@@ -14,6 +14,24 @@ namespace PSL.TotalRecall
 		private string m_strNewName = "";
 		private string m_strNewUrl = "";
 		
+		public ResourceCtxMsg( ResourceMsg resMsg )
+		{
+			if( resMsg == null )
+				throw new ArgumentNullException( "resMsg", "Invalid resource message" );
+
+			this.MeetingID = resMsg.MeetingID;
+			this.Sender = resMsg.Sender;
+			this.SenderUrl = resMsg.SenderUrl;
+			this.m_strMessageID = resMsg.MessageID;
+
+
+			IEnumerator it = resMsg.m_lstResources.GetEnumerator();
+			while( it.MoveNext() )
+			{
+				this.m_lstResID.Add( ((Resource) it.Current).ID ); 	
+			}
+		}
+
 		public ResourceCtxMsg()
 		{
 		}

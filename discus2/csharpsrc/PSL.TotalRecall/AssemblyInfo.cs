@@ -27,6 +27,7 @@ using System.Runtime.CompilerServices;
 // by using the '*' as shown below:
 
 [assembly: AssemblyVersion("1.0.1213.21946")]
+// [assembly: AssemblyVersion("1.0.1214.21900")] will be final version number for sem
 
 //
 // In order to sign your assembly you must specify a key to use. Refer to the 

@@ -73,7 +73,9 @@ namespace PSL.TotalRecall
 			{
 				if( value == null )
 					return;
+				
 				this.m_resourceMsg = value;
+				this.m_resourceMsg.MeetingID = this.MeetingID;
 			}
 		}
 	}

@@ -8,7 +8,6 @@ namespace PSL.TotalRecall
 	public abstract class Constants
 	{
 		public const string DBConnect = "DSN=TotalRecall;UID=TotalRecallUser;PWD=[32totalRecall67;WSID=HERITAGE0;DATABASE=TotalRecall";
-		public const string ME = "Me";
 		public const string DEFAULT_CERT_PSWD = "discus";
 
 		// Database table names
