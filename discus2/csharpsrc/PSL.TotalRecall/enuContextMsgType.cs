@@ -7,9 +7,14 @@ namespace PSL.TotalRecall
 	/// </summary>
 	public enum enuContextMsgType
 	{
-		IAJoined,
-		IALeft,
-		IALeaving,
+		MeetingRequest,
+		MeetingRequestAccept,
+		MeetingRequestRefuse,
+		InfoAgentJoined,
+		InfoAgentLeft,
+		InfoAgentLeaving,
+		RecommendationRequest,
+		RecommendationResponse,
 		Unknown
 	}
 }
