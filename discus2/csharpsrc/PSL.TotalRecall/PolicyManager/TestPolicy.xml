@@ -2,8 +2,9 @@
 <Policy xmlns="http://psl.cs.columbia.edu/discus2/Policy" 
 		xmlns:all="http://psl.cs.columbia.edu/discus2/All"
 		xmlns:rp="http://psl.cs.columbia.edu/discus2/RequiresParticipants"
-		xmlns:rt="http://psl.cs.columbia.edu/discus2/RequiresTopic">
-	<all:All>
+		xmlns:rt="http://psl.cs.columbia.edu/discus2/RequiresTopic"
+		xmlns:ref="http://psl.cs.columbia.edu/discus2/PolicyReference">
+	<!--<all:All>
 		<rp:RequiresParticipants>
 			<rp:Participant>joe</rp:Participant>
 			<rp:Participant>bob</rp:Participant>
@@ -20,6 +21,9 @@
 				<rt:Topic>My Topic</rt:Topic>
 			</rt:RequiresTopic>
 		</Some>
-	</all:All>
+	</all:All>-->
+	<ref:PolicyReference>
+		<ref:policyId>cd485c51-ea10-4d38-88e1-f16c9316adc3</ref:policyId>
+	</ref:PolicyReference>
 </Policy>
 
