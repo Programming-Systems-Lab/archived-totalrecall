@@ -129,7 +129,14 @@ namespace PSL.TotalRecall.PolicyManager
 			}
 			
 			// now evaluate the one element in this policy
-			return invokeEvaluator(policy.Any, context);
+			if (policy.Any != null) 
+			{
+				return invokeEvaluator(policy.Any, context);
+			}
+			else 
+			{
+				return new EvaluationResult(TAG, true, "Blank policy");
+			}
 
 		}
 

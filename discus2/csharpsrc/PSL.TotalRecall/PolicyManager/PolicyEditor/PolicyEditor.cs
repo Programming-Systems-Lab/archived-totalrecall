@@ -216,9 +216,10 @@ namespace PSL.TotalRecall.PolicyManager
 			// tabs
 			// 
 			this.tabs.Controls.AddRange(new System.Windows.Forms.Control[] {
-																			   this.resourcesTab,
+																			   this.policiesTab,
 																			   this.categoriesTab,
-																			   this.policiesTab});
+																			   this.resourcesTab
+																			   });
 			this.tabs.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tabs.Name = "tabs";
 			this.tabs.SelectedIndex = 0;
