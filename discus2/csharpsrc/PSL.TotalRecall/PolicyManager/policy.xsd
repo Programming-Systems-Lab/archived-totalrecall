@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<xs:schema id="Policy" targetNamespace="http://tempuri.org/Policy.xsd" elementFormDefault="qualified" xmlns="http://tempuri.org/Policy.xsd" xmlns:mstns="http://tempuri.org/Policy.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema id="Policy" elementFormDefault="qualified" xmlns="http://psl.cs.columbia.edu/discus2/policy" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://psl.cs.columbia.edu/discus2/policy">
 	<xs:element name="Policy">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:sequence minOccurs="1" maxOccurs="unbounded">
+				<xs:sequence minOccurs="1" maxOccurs="1">
 					<xs:any />
 				</xs:sequence>
 			</xs:sequence>

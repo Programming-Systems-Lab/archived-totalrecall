@@ -9,7 +9,8 @@ namespace PSL.TotalRecall.PolicyManager
 	/// </summary>
 	public class RequiresParticipantsEvaluator : IPolicyEvaluator
 	{
-		
+		public const string TAG = "RequiresParticipants";
+
 		private XmlSerializer serializer = new XmlSerializer(typeof(RequiresParticipants));
 
 		public EvaluationResult evaluateExpression(XmlElement expressionDoc, IContext context) 
@@ -34,13 +35,13 @@ namespace PSL.TotalRecall.PolicyManager
 				if (context.Participants[participant] == null) 
 				{
 					// return "false" as the evaluation result
-					return new EvaluationResult(false, "Participant " + participant + " not in context");
+					return new EvaluationResult(TAG, false, "Participant " + participant + " not in context");
 				}
 
 			}
 
 			// if we got here, it means all participants were found
-			return new EvaluationResult(true, "All participants found in context");
+			return new EvaluationResult(TAG, true, "All participants found in context");
 		}
 
 	}

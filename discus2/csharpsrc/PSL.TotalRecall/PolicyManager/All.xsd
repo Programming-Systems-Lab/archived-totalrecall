@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xs:schema id="All" elementFormDefault="qualified" xmlns="http://psl.cs.columbia.edu/discus2/All" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://psl.cs.columbia.edu/discus2/All">
+	<xs:element name="All">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:sequence minOccurs="1" maxOccurs="unbounded">
+					<xs:any />
+				</xs:sequence>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
