@@ -483,6 +483,8 @@ namespace TotalRecall
 				// Anyone can send a response, just save it
 				ContextMsgDAO ctxMsgDAO = new ContextMsgDAO( this.DBConnect );
 				ctxMsgDAO.ReceiveContextMessage( respMsg, false );
+				// Process context message response
+				ProcessContextMessageResponse( respMsg, senderCert );
 			}
 			catch( Exception e )
 			{
@@ -491,6 +493,32 @@ namespace TotalRecall
 			}
 		}
 		
+		private void ProcessContextMessageResponse( ContextMsgResponse respMsg, X509Certificate senderCert )
+		{
+			// If the response is of type resource recalled then
+			// get the context messages sent that matches
+			// recreate the message sent, scroll thru the list of
+			// resource ids recalled and update our database to reflect that
+			if( respMsg.Type == enuContextMsgType.ResourceRecalledResponse )
+			{
+				ContextMsgDAO ctxMsgDAO = new ContextMsgDAO( this.DBConnect );
+				ContextMsg ctxMsg = ctxMsgDAO.GetContextMsgSent( respMsg.MeetingID, respMsg.MessageID, respMsg.Sender );
+				if( ctxMsg == null )
+					return;
+
+				if( ctxMsg is ResourceCtxMsg && ctxMsg.Type == enuContextMsgType.ResourceRecalled )
+				{
+					ResourceDAO resDAO = new ResourceDAO( this.DBConnect );
+					ResourceCtxMsg resCtxMsg = (ResourceCtxMsg) ctxMsg;
+					IEnumerator it = resCtxMsg.ResourceIDs.GetEnumerator();
+					while( it.MoveNext() )
+					{
+						resDAO.RecallResource( (string) it.Current );
+					}
+				}
+			}
+		}
+
 		[SoapDocumentMethod(OneWay=true)]
 		[WebMethod]
 		public void SendContextUpdate( string strCtxResponse, string strContactID, string strIAUrl )
