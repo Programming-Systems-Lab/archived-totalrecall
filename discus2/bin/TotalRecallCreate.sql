@@ -8,6 +8,7 @@ drop table AccessPolicies
 drop table Participants
 drop table ContextMessageResponses
 drop table ContextMessagesSent
+drop table ContactCache
 drop table Contacts
 drop table Roles
 drop table Meetings
@@ -74,6 +75,15 @@ create table Participants
 	CREATEDATE DATETIME NOT NULL DEFAULT GETDATE(),
 	MODIFYDATE DATETIME NOT NULL DEFAULT GETDATE()
 )
+
+-- Table holds information on the dynamically generated proxies for 
+-- information agents we meet
+create table ContactCache
+(
+	CONTACT_ID nvarchar(100) not null primary key constraint FK_ContactCache_Contact_ID Foreign key references Contacts(CONTACT_ID) on delete no action,	
+	PART_LOC nvarchar(256) not null check(len(PART_LOC) > 0)		
+)
+
 
 -- Table holds the catalogue of all resources available to an IA
 create table Resources
