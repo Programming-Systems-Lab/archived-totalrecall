@@ -325,7 +325,7 @@ namespace PSL.TotalRecall
 				strQueryBuilder.Append( " SET " );
 				strQueryBuilder.Append( Constants.NEWMSG );
 				strQueryBuilder.Append( "=" );
-				strQueryBuilder.Append( 1 );
+				strQueryBuilder.Append( 0 );
 				strQueryBuilder.Append( " WHERE " );
 				strQueryBuilder.Append( Constants.CTXMSG_ID );
 				strQueryBuilder.Append( " IN " );
