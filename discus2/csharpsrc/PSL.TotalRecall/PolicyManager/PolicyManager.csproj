@@ -130,6 +130,29 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "PolicyManager.exe.config"
+                    BuildAction = "Content"
+                />
+                <File
+                    RelPath = "PolicyReference.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "PolicyReference.xsd"
+                    BuildAction = "Content"
+                />
+                <File
+                    RelPath = "PolicyReference.xsx"
+                    DependentUpon = "PolicyReference.xsd"
+                    BuildAction = "None"
+                />
+                <File
+                    RelPath = "PolicyReferenceEvaluator.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "PolicySchema.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -173,16 +196,31 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Some.xsd"
+                    BuildAction = "Content"
+                />
+                <File
+                    RelPath = "Some.xsx"
+                    DependentUpon = "Some.xsd"
+                    BuildAction = "None"
+                />
+                <File
+                    RelPath = "SomeEvaluator.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "SomeSchema.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Test.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
                     RelPath = "TestPolicy.xml"
-                    BuildAction = "Content"
-                />
-                <File
-                    RelPath = "Topic.xml"
                     BuildAction = "Content"
                 />
                 <File

@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 namespace PSL.TotalRecall.PolicyManager
 {
 	/// <summary>
-	/// An implemenation to evaluate a RequiresParticipants policy expression tag
+	/// An implementation to evaluate a RequiresParticipants policy expression tag
 	/// </summary>
 	public class RequiresParticipantsEvaluator : IPolicyEvaluator
 	{

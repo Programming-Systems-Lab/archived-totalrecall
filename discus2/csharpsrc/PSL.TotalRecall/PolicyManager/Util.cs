@@ -27,6 +27,7 @@ namespace PSL.TotalRecall.PolicyManager
 		public static void serialize(Object o, TextWriter writer) 
 		{
 			XmlSerializer ser = new XmlSerializer(o.GetType());
+			
 			ser.Serialize(writer, o);
 		}
 	

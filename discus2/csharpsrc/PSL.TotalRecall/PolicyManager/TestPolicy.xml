@@ -1,4 +1,4 @@
-﻿<!--<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <Policy xmlns="http://psl.cs.columbia.edu/discus2/Policy" 
 		xmlns:all="http://psl.cs.columbia.edu/discus2/All"
 		xmlns:rp="http://psl.cs.columbia.edu/discus2/RequiresParticipants"
@@ -8,21 +8,18 @@
 			<rp:Participant>joe</rp:Participant>
 			<rp:Participant>bob</rp:Participant>
 		</rp:RequiresParticipants>
-		<rt:RequiresTopic IsRegex="true">
-			<rt:Topic>your topic|topic</rt:Topic>
-		</rt:RequiresTopic>
+		<Some xmlns="http://psl.cs.columbia.edu/discus2/Some">
+			<min>3</min>
+			<rt:RequiresTopic IsRegex="true">
+				<rt:Topic>your topic|topic</rt:Topic>
+			</rt:RequiresTopic>
+			<rt:RequiresTopic IsRegex="true">
+				<rt:Topic>foobar</rt:Topic>
+			</rt:RequiresTopic>
+			<rt:RequiresTopic>
+				<rt:Topic>My Topic</rt:Topic>
+			</rt:RequiresTopic>
+		</Some>
 	</all:All>
-</Policy>-->
-
-<?xml version="1.0" encoding="IBM437"?>
-<Policy xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://psl.cs.columbia.edu/discus2/Policy">
-  <All xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://psl.cs.columbia.edu/discus2/All">
-    <RequiresTopic xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://psl.cs.columbia.edu/discus2/RequiresTopic">
-      <Topic>foobar</Topic>
-    </RequiresTopic>
-    <RequiresParticipants xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://psl.cs.columbia.edu/discus2/RequiresParticipants">
-      <Participant>joe</Participant>
-      <Participant>bob</Participant>
-    </RequiresParticipants>
-  </All>
 </Policy>
+
