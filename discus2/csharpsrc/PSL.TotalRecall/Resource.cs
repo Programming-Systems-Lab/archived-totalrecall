@@ -46,5 +46,12 @@ namespace PSL.TotalRecall
 				this.m_strUrl = value;
 			}
 		}
+
+		public override string ToString()
+		{
+			return m_strName;
+
+		}
+
 	}
 }
