@@ -196,22 +196,7 @@ namespace PSL.TotalRecall
 					// Get the context message type
 					enuContextMsgType type = (enuContextMsgType) enuContextMsgType.Parse( typeof(enuContextMsgType), (string) dr[Constants.CTXMSG_TYPE], true ); 
 					string strCtxMsg = (string) dr[Constants.CTXMSG];
-					ContextMsg ctxMsg = null;
-					switch( type )
-					{
-						case enuContextMsgType.InfoAgentJoined: 
-						case enuContextMsgType.InfoAgentLeft: ctxMsg = InfoAgentCtxMsg.FromXml( strCtxMsg );
-															  break;
-						
-						case enuContextMsgType.MeetingEnded:
-						case enuContextMsgType.MeetingResumed:
-						case enuContextMsgType.MeetingSuspended: ctxMsg = MeetingStatusCtxMsg.FromXml( strCtxMsg );
-																 break;
-						
-						case enuContextMsgType.RecommendationRequest: ctxMsg = RecommendationRequestCtxMsg.FromXml( strCtxMsg );
-																	  break;		
-					}
-
+					ContextMsg ctxMsg = this.RecreateContextMsgFromXml( strCtxMsg, type );
 					if( ctxMsg != null )
 						lstMessages.Add( ctxMsg );
 				}
@@ -371,6 +356,98 @@ namespace PSL.TotalRecall
 			}
 
 			return bRetVal;
+		}
+
+		public ContextMsg GetContextMsgSent( string strMeetingID, string strCtxMsgID, string strContactID )
+		{
+			// Quick error checks
+			if( strMeetingID == null || strMeetingID.Length == 0 )
+				throw new ArgumentException( "Invalid meeting ID", "strMeetingID" );
+			if( strCtxMsgID == null || strCtxMsgID.Length == 0 )
+				throw new ArgumentException( "Invalid context message ID", "strCtxMsgID" );
+			if( strContactID == null || strContactID.Length == 0 )
+				throw new ArgumentException( "Invalid contact ID", "strContactID" );
+			
+			OdbcDataReader dr = null;
+			ContextMsg ctxMsg = null;
+
+			try
+			{
+				StringBuilder strQueryBuilder = new StringBuilder();
+				strQueryBuilder.Append( " SELECT " );
+				strQueryBuilder.Append( Constants.CTXMSG );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.CTXMSG_TYPE );
+				strQueryBuilder.Append( " FROM " );
+				strQueryBuilder.Append( Constants.CONTEXT_MSGS_SENT_TABLENAME );
+				strQueryBuilder.Append( " WHERE " );
+				strQueryBuilder.Append( Constants.MTG_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strMeetingID ) + "'" );
+				strQueryBuilder.Append( " AND " );
+				strQueryBuilder.Append( Constants.CTXMSG_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strCtxMsgID ) + "'" );
+				strQueryBuilder.Append( " AND " );
+				strQueryBuilder.Append( Constants.CONTACT_ID );
+				strQueryBuilder.Append( "=" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strContactID ) + "'" );
+
+				dr =  QueryService.ExecuteReader( this.DBConnect, strQueryBuilder.ToString() );
+				if( dr == null )
+					throw new Exception( "Null data reader returned from query" );
+				
+				// Advance data reader to first record
+				if( dr.Read() )
+				{
+					enuContextMsgType type = (enuContextMsgType) enuContextMsgType.Parse( typeof(enuContextMsgType), (string) dr[Constants.CTXMSG_TYPE], true ); 
+					string strCtxMsg = (string) dr[Constants.CTXMSG];
+					ctxMsg = this.RecreateContextMsgFromXml( strCtxMsg, type );
+				}
+			}
+			catch( Exception /*e*/ )
+			{
+			}
+			finally
+			{
+				if( dr != null )
+					dr.Close();
+			}
+			return ctxMsg;
+		}
+		
+		private ContextMsg RecreateContextMsgFromXml( string strCtxMsg, enuContextMsgType type )
+		{
+			if( strCtxMsg == null || strCtxMsg.Length == 0 )
+				throw new ArgumentException( "Invalid Xml", "strCtxMsg" );
+			
+			ContextMsg ctxMsg = null;
+			try
+			{
+				switch( type )
+				{
+					case enuContextMsgType.InfoAgentJoined: 
+					case enuContextMsgType.InfoAgentLeft: ctxMsg = InfoAgentCtxMsg.FromXml( strCtxMsg );
+						break;
+							
+					case enuContextMsgType.MeetingEnded:
+					case enuContextMsgType.MeetingResumed:
+					case enuContextMsgType.MeetingSuspended: ctxMsg = MeetingStatusCtxMsg.FromXml( strCtxMsg );
+						break;
+							
+					case enuContextMsgType.RecommendationRequest: ctxMsg = RecommendationRequestCtxMsg.FromXml( strCtxMsg );
+						break;
+					
+					case enuContextMsgType.ResourceRecalled:
+					case enuContextMsgType.ResourceShared: ctxMsg = ResourceCtxMsg.FromXml( strCtxMsg );
+						break;
+				}
+			}
+			catch( Exception /*e*/ )
+			{
+			}
+
+			return ctxMsg;
 		}
 	}
 }
