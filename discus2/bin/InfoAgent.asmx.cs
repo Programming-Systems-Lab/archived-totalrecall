@@ -1343,7 +1343,7 @@ namespace TotalRecall
 				pxyGenReq.WsdlUrl = strIAUrl;
 				strAssembly = (string) this.GenerateWebServiceProxy( pxyGenReq );
 				// Update contact cache data
-				ctcCacheDAO.UpdateContactLocation( strContactID, strAssembly );
+				ctcCacheDAO.AddContactLocation( strContactID, strAssembly );
 			}
 
 			// Create an execution context
@@ -1596,10 +1596,13 @@ namespace TotalRecall
 				// Set sender info on inner resource message
 				recRespMsg.ResourceMessage.Sender = me.Name;
 				recRespMsg.ResourceMessage.SenderUrl = me.Location;
+				recRespMsg.Type = enuContextMsgType.ResourceShared;
+				recRespMsg.Dest = organizer.Name;
+				recRespMsg.DestUrl = organizer.Location;
 				// Send resources to meeting organizer, the organizer is responsible
 				// for showing these resources (here we actually push the resources 
 				// using DIME)
-				this.SendResources( recRespMsg.ResourceMessage, organizer.Name, organizer.Location );
+				this.SendResources( recRespMsg.ResourceMessage, recRespMsg.Dest, recRespMsg.DestUrl );
 			}
 		}
 		
@@ -1619,7 +1622,7 @@ namespace TotalRecall
 				pxyGenReq.WsdlUrl = strIAUrl;
 				strAssembly = (string) this.GenerateWebServiceProxy( pxyGenReq );
 				// Update contact cache data
-				ctcCacheDAO.UpdateContactLocation( strContactID, strAssembly );
+				ctcCacheDAO.AddContactLocation( strContactID, strAssembly );
 			}
 
 			// Create an execution context
@@ -1794,6 +1797,9 @@ namespace TotalRecall
 			if( resMsg.m_lstResources.Count > 0 )
 			{
 				ResourceCtxMsg resCtxMsg = new ResourceCtxMsg( resMsg );
+				resCtxMsg.Type = enuContextMsgType.ResourceShared;
+				resCtxMsg.Dest = me.Name;
+				resCtxMsg.DestUrl = me.Location;
 				ContextMsgDAO ctxDAO = new ContextMsgDAO( this.DBConnect );
 				ctxDAO.ReceiveContextMessage( resCtxMsg, false );
 								
@@ -1809,6 +1815,151 @@ namespace TotalRecall
 			}
 		}
 		
+		[SoapDocumentMethod(OneWay=true)]
+		[WebMethod]
+		public void RecallMyResources( string strResCtxMsg )
+		{
+			// Sender must be a meeting participant
+			// IA receiving must be the organizer
+			try
+			{
+				// Accept only SOAP requests
+				SoapContext reqCtx = HttpSoapContext.RequestContext;
+				if( reqCtx == null )
+				{
+					// Read in the entire Soap envelope and try to get a SoapContext that
+					// way
+					try
+					{
+						// Get the Http request
+						HttpRequest httpReq = this.Context.Request;
+						// Try to get a Soap Context from it
+						reqCtx = this.GetSoapContextFromHttpRequest( ref httpReq );		
+					}
+					catch( Exception /*e*/ )
+					{}
+				}
+				if( reqCtx == null )
+					throw new ApplicationException( "Non-SOAP message!!!" );
+				
+				if( strResCtxMsg == null || strResCtxMsg.Length == 0 )
+					throw new SoapException( "Invalid Resource Context Message Response", SoapException.ClientFaultCode );
+				
+				// Process the request to ensure the SOAP message
+				// was signed etc. and return the certificate of the signer
+				X509Certificate senderCert = ProcessRequest( ref reqCtx );
+				// Only someone with my cert can direct me to recall resources
+				// I've shared
+				if( !senderCert.Equals( this.m_signingCert ) )
+					throw new SoapException( "Unauthorized operation, recall directive refused", SoapException.ClientFaultCode );			
+								
+				ResourceCtxMsg resCtxMsg = null;
+				try
+				{	
+					resCtxMsg = ResourceCtxMsg.FromXml( strResCtxMsg );
+				}
+				catch( Exception /*e*/ )
+				{
+					throw new SoapException( "Invalid Resource Context Message", SoapException.ClientFaultCode );
+				}
+
+				this.RecallMyResources( resCtxMsg );
+			}
+			catch( Exception e )
+			{
+				// Log exception
+				EventLog.WriteEntry( SOURCE, e.Message, EventLogEntryType.Error );
+			}
+		}
+		
+		private void RecallMyResources( ResourceCtxMsg resCtxMsg )
+		{
+			MeetingDAO mtgDAO = new MeetingDAO( this.DBConnect );
+			// Ignore messages about meetings we know nothing about
+			if( mtgDAO.IsNewMeeting( resCtxMsg.MeetingID ) )
+				return;
+			
+			// Get the meeting organizer, we tell the organizer to remove the
+			// resources we've shared from the meeting
+			ParticipantDAO participDAO = new ParticipantDAO( this.DBConnect );
+			MeetingParticipant organizer = participDAO.GetOrganizer( resCtxMsg.MeetingID );
+			if( organizer == null )
+				return;
+
+			// If I'm the organizer then remove these resources (mark them as recalled)
+			if( organizer.Name == me.Name )
+			{
+				ResourceDAO resDAO = new ResourceDAO( this.DBConnect );
+				// Get resources shared by owner
+				Hashtable resources = resDAO.GetSharedResources( resCtxMsg.MeetingID, resCtxMsg.Sender );
+				IEnumerator it = resCtxMsg.ResourceIDs.GetEnumerator();
+				while( resources.Count > 0 && it.MoveNext() )
+				{
+					string strResID = (string) it.Current;
+					// Recall the resources specified from the set shared
+					if( resources[strResID] != null )
+						resDAO.RecallResource( strResID );
+				}
+			}
+			else
+			{
+				// Call recall resources on the meeting organizer
+				// Record that we sent the context message
+				resCtxMsg.Sender = me.Name;
+				resCtxMsg.SenderUrl = me.Location;
+				resCtxMsg.Dest = organizer.Name;
+				resCtxMsg.DestUrl = organizer.Location;
+				resCtxMsg.Type = enuContextMsgType.ResourceRecalled;
+				ContextMsgDAO ctxMsgDAO = new ContextMsgDAO( this.DBConnect );
+				ctxMsgDAO.SendContextMessage( resCtxMsg );
+				// Actually send the context message
+				this.SendRecallResources( resCtxMsg, resCtxMsg.Dest, resCtxMsg.DestUrl );
+			}
+		}
+
+		private void SendRecallResources( ResourceCtxMsg resCtxMsg, string strContactID, string strIAUrl )
+		{
+			// Check the contact cache if we have an assembly
+			// then load an invoke
+			// if we don't have one then generate one then invoke
+			ContactCacheDAO ctcCacheDAO = new ContactCacheDAO( this.DBConnect );
+			string strAssembly = ctcCacheDAO.GetContactLocation( strContactID );
+			if( strAssembly == null || strAssembly.Length == 0 )
+			{
+				// Generate a web service proxy
+				ProxyGenRequest pxyGenReq = new ProxyGenRequest();
+				pxyGenReq.ProxyPath = this.ProxyCache;
+				pxyGenReq.ServiceName = INFO_AGENT;
+				pxyGenReq.WsdlUrl = strIAUrl;
+				strAssembly = (string) this.GenerateWebServiceProxy( pxyGenReq );
+				// Update contact cache data
+				ctcCacheDAO.AddContactLocation( strContactID, strAssembly );
+			}
+
+			// Create an execution context
+			ExecContext execCtx = new ExecContext();
+			// Get the assembly
+			execCtx.Assembly = strAssembly;
+			// Add the parameters...in this case the context message to sign
+			execCtx.AddParameter( Serializer.Serialize( resCtxMsg.ToXml() ) );
+			// Name of method to execute on the remote agent
+			execCtx.MethodName = "RecallResources";
+			// Fully qualified name of proxy class
+			execCtx.ServiceName = ProxyGenRequest.DEFAULT_PROXY_NAMESPACE + "." + INFO_AGENT;
+			// Create an executor to do invocation
+			Executor exec = new Executor();
+			// Create a settings instance
+			ExecutorSettings settings = new ExecutorSettings();
+			// DO NOT expect a signed response since we are executing a one way method
+			settings.ExpectSignedResponse = false;
+			// Set the certificate to use to sign the outgoing message
+			settings.SigningCertificate = this.SigningCert;
+			// Set the executor settings instance
+			exec.Settings = settings;
+			// Do invocation (expect null/"" returned)
+			object objRes = exec.Execute( execCtx );
+		}
+
 		[SoapDocumentMethod(OneWay=true)]
 		[WebMethod]
 		public void RecallResources( string strResCtxMsg )
@@ -1883,10 +2034,12 @@ namespace TotalRecall
 			// Only the owner and the meeting organizer know the resource ids
 			ResourceDAO resDAO = new ResourceDAO( this.DBConnect );
 			IEnumerator it = resCtxMsg.ResourceIDs.GetEnumerator();
-			while( it.MoveNext() )
+			Hashtable resources = resDAO.GetSharedResources( resCtxMsg.MeetingID, resCtxMsg.Sender );
+			while( resources.Count > 0 && it.MoveNext() )
 			{
 				string strResID = (string) it.Current;
-				resDAO.RecallResource( strResID );
+				if( resources[strResID] != null )
+					resDAO.RecallResource( strResID );
 			}
 
 			// Send a response
