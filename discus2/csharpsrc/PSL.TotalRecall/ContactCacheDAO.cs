@@ -15,6 +15,47 @@ namespace PSL.TotalRecall
 		{
 		}
 
+		public bool AddContactLocation( string strContactID, string strLocation )
+		{
+			// Quick error checks
+			if( strContactID == null || strContactID.Length == 0 )
+				throw new ArgumentException( "Invalid contact ID", "strContactID" );
+			if( strLocation == null || strLocation.Length == 0 )
+				throw new ArgumentException( "Invalid contact location", "strLocation" );
+
+			bool bRetVal = false;
+
+			try
+			{
+				StringBuilder strQueryBuilder = new StringBuilder();
+				strQueryBuilder.Append( " INSERT INTO " );
+				strQueryBuilder.Append( Constants.CONTACT_CACHE_TABLENAME );
+				strQueryBuilder.Append( "(" );
+				strQueryBuilder.Append( Constants.CONTACT_ID );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( Constants.PART_LOC );
+				strQueryBuilder.Append( ")" );
+				strQueryBuilder.Append( " VALUES " );
+				strQueryBuilder.Append( "(" );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strContactID ) + "'" );
+				strQueryBuilder.Append( "," );
+				strQueryBuilder.Append( "'" + QueryService.MakeQuotesafe( strLocation ) + "'" );
+				strQueryBuilder.Append( ")" );
+				
+				int nRowsAffected = QueryService.ExecuteNonQuery( this.DBConnect, strQueryBuilder.ToString() );
+				if( nRowsAffected == 1 )
+					bRetVal = true;
+			}
+			catch( Exception /*e*/ )
+			{
+			}
+			finally
+			{
+			}
+
+			return bRetVal;			
+		}
+
 		public string GetContactLocation( string strContactID )
 		{
 			// Quick error checks
