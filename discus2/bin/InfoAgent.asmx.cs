@@ -25,9 +25,50 @@ using PSL.TotalRecall;
 using PSL.TotalRecall.Util;
 using PSL.Web.Services.DynamicInvoke;
 using PSL.Web.Services.DynamicProxy;
-
+using PSL.TotalRecall.PolicyManager;
 namespace TotalRecall
 {
+	public class Context:IContext
+	{
+		private Hashtable m_participants = new Hashtable();
+		private string m_strTopic = "";
+
+		public Context()
+		{}
+			
+		public Hashtable Participants
+		{ 
+			get
+			{ return this.m_participants; }
+		}
+
+		public string Topic
+		{
+			get
+			{ return this.m_strTopic; }
+			set
+			{
+				if( value == null || value.Length == 0 )
+					return;
+
+				this.m_strTopic = value;
+			}
+		}
+
+		public void AddParticipant( string strContactID )
+		{
+			if( strContactID == null || strContactID.Length == 0 )
+				return;
+
+			this.m_participants.Add( strContactID, strContactID );
+		}
+
+		public void ClearParticipants()
+		{
+			this.m_participants.Clear();
+		}
+	}
+	
 	/// <summary>
 	/// Summary description for InfoAgent.
 	/// </summary>
@@ -141,7 +182,7 @@ namespace TotalRecall
 			// Set the proxy cache location
 			this.ProxyCache = ConfigurationSettings.AppSettings["ProxyCache"];
 			// Set the database connection string
-			this.DBConnect = ConfigurationSettings.AppSettings["ConnectionString"];
+			this.DBConnect = ConfigurationSettings.AppSettings["DatabaseConnectionString"];
 			// Set the info agent url
 			this.IAUrl = ConfigurationSettings.AppSettings["InfoAgentUrl"];
 
@@ -1581,16 +1622,49 @@ namespace TotalRecall
 
 			ParticipantDAO participDAO = new ParticipantDAO( this.DBConnect );
 			ResourceDAO resDAO = new ResourceDAO( this.DBConnect );
+			Context ctx = new Context();
+			ctx.Topic = mtgDAO.GetMeetingTopic( recRespMsg.MeetingID );
+			ArrayList lstParticipants = participDAO.GetParticipants( recRespMsg.MeetingID );
+			IEnumerator participIt = lstParticipants.GetEnumerator();
+			while( participIt.MoveNext() )
+			{
+				MeetingParticipant p = (MeetingParticipant) participIt.Current;
+				ctx.AddParticipant( p.Name );
+			}
+
 			MeetingParticipant organizer = participDAO.GetOrganizer( recRespMsg.MeetingID );
 			
 			IEnumerator it = recRespMsg.ResourceMessage.m_lstResources.GetEnumerator();
 			while( it.MoveNext() )
 			{
 				Resource res = (Resource) it.Current;
-				MeetingResource mtgRes = new MeetingResource( res, recRespMsg.MeetingID, me.Name );
-				// Here is where we would ask the policy manager if it's ok to
-				// share this resource
-				resDAO.AddMeetingResource( mtgRes.MeetingID, mtgRes );
+				// For each resource recommended, clear it with the policy manager
+				// Get the policies governing a resource
+				ArrayList lstPolicy = resDAO.GetResourcePolicies( res.ID );
+				if( lstPolicy.Count == 0 )
+				{
+					MeetingResource mtgRes = new MeetingResource( res, recRespMsg.MeetingID, me.Name );
+					// Here is where we would ask the policy manager if it's ok to
+					// share this resource
+					resDAO.AddMeetingResource( mtgRes.MeetingID, mtgRes );
+					continue; // Move on to next resource
+				}
+				
+				// Get the policies governing each resource
+				IEnumerator polIt = lstPolicy.GetEnumerator();
+				while( polIt.MoveNext() )
+				{
+					// Determine what can be shared
+					EvaluationResult evalRes = PolicyManager.evaluatePolicy( (string) polIt.Current, ctx );
+					if( evalRes.Result == true )
+					{
+						MeetingResource mtgRes = new MeetingResource( res, recRespMsg.MeetingID, me.Name );
+						// Here is where we would ask the policy manager if it's ok to
+						// share this resource
+						resDAO.AddMeetingResource( mtgRes.MeetingID, mtgRes );
+						break; // Accept the first policy that is satisfied
+					}
+				}
 			}
 			
 			// If I'm not the organizer then I have to send a context message
