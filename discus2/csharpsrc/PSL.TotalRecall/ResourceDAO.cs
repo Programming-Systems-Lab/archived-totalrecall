@@ -288,6 +288,51 @@ namespace PSL.TotalRecall
 			return retVal;
 		}
 
+		/// <summary>
+		/// Returns an ArrayList of Categories associated with this resource
+		/// </summary>
+		/// <param name="resourceId"></param>
+		/// <returns></returns>
+		public ArrayList GetResourceCategories(string resourceId)
+		{
+			ArrayList categories = new ArrayList();
+			OdbcDataReader dr = null;
+						
+			try
+			{
+				string query = " SELECT " + Constants.CATEGORIES_TABLENAME + ".*" +
+					" FROM " + Constants.CATEGORIES_TABLENAME + ", " + Constants.RESOURCE_CATEGORIES_TABLENAME +
+					" WHERE " + Constants.RES_ID + "=" + "'" + QueryService.MakeQuotesafe( resourceId ) + "'" +
+					" AND " + Constants.RESOURCE_CATEGORIES_TABLENAME + "." + Constants.CAT_NAME + "=" +
+							  Constants.CATEGORIES_TABLENAME + "." + Constants.CAT_NAME;
+
+				dr =  QueryService.ExecuteReader( this.DBConnect, query );
+				if( dr == null )
+					throw new Exception( "Null data reader returned from query" );
+
+				// Scroll thru list returned
+				while( dr.Read() )
+				{
+					Category cat =  new Category();
+					cat.Name = (string) dr[Constants.CAT_NAME];
+					cat.PolicyID = (string) dr[Constants.ACCPOL_ID];
+					categories.Add( cat );
+				}
+			}
+			catch( Exception e )
+			{
+				Console.WriteLine("Exception in GetResourceCategories(): " + e);
+			}
+			finally
+			{
+				if( dr != null )
+					dr.Close();
+			}
+
+			return categories;
+		}
+
+		
 		public Resource GetResourceByName( string strResourceName )
 		{
 			// Quick error checks
