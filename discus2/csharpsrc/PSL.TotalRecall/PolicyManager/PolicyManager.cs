@@ -30,7 +30,9 @@ namespace PSL.TotalRecall.PolicyManager
 		/// A table of mappings between namespaces of policy expression and the corresponding 
 		/// IPolicyEvaluator class name
 		/// </summary>
-		private static Hashtable evaluatorNames;
+		//private static Hashtable evaluatorNames;
+		private static IDictionary evaluatorMappings = 
+			(IDictionary) ConfigurationSettings.GetConfig("PolicyEvaluatorMappings");
 
 		public const string TAG = "Policy";
 
@@ -54,7 +56,7 @@ namespace PSL.TotalRecall.PolicyManager
 			// initialize table 
 			// TODO: probably read this from some config file
 			// use ConfigurationSettings.AppSettings["foo"];
-			evaluatorNames = new Hashtable();
+			/*evaluatorNames = new Hashtable();
 			
 			evaluatorNames.Add("http://psl.cs.columbia.edu/discus2/All",
 				"PSL.TotalRecall.PolicyManager.AllEvaluator");
@@ -64,6 +66,7 @@ namespace PSL.TotalRecall.PolicyManager
 
 			evaluatorNames.Add("http://psl.cs.columbia.edu/discus2/RequiresTopic",
 				"PSL.TotalRecall.PolicyManager.RequiresTopicEvaluator");
+				*/
 		}
 
 		/// <summary>
@@ -109,7 +112,10 @@ namespace PSL.TotalRecall.PolicyManager
 
 			// get class that corresponds to this element
 			// we use the namespace attribute for this tag
-			string className = (string) evaluatorNames[element.NamespaceURI];
+			
+			//string className = (string) evaluatorNames[element.NamespaceURI];
+			string className = (string) evaluatorMappings[element.NamespaceURI];
+
 			if (className == null) 
 			{
 				result = new EvaluationResult(TAG, false, "Evaluator class not found for tag " +
