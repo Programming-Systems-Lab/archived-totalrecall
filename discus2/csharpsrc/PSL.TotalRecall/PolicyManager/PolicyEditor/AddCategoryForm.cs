@@ -22,18 +22,25 @@ namespace PSL.TotalRecall.PolicyManager
 		/// </summary>
 		private System.ComponentModel.Container components = null;
 
-		public AddCategoryForm()
+		public AddCategoryForm(AccessPolicy[] policies)
 		{
 			//
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
+			policyList.Items.AddRange(policies);
 		}
 
+
+		public void SetModify(string categoryName, AccessPolicy selectedPolicy) 
+		{
+			nameText.Text = categoryName;
+			policyList.SelectedItem = selectedPolicy;
+
+			this.Text = "Modify Category";
+			addButton.Text = "Modify";
+		}
 
 		public string CategoryName 
 		{

@@ -34,6 +34,15 @@ namespace PSL.TotalRecall.PolicyManager
 			//
 		}
 
+		public void SetModify(string resourceName, string resourceUrl) 
+		{
+			nameText.Text = resourceName;
+			urlText.Text = resourceUrl;
+
+			this.Text = "Modify Resource";
+			addButton.Text = "Modify";
+		}
+
 
 		public string ResourceName 
 		{

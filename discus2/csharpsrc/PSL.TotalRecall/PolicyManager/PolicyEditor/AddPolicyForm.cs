@@ -35,6 +35,15 @@ namespace PSL.TotalRecall.PolicyManager
 		}
 
 
+		public void SetModify(string policyName, string policyDoc) 
+		{
+			nameText.Text = policyName;
+			policyText.Text = policyDoc;
+
+			this.Text = "Modify Policy";
+			addButton.Text = "Modify";
+		}
+
 		public string PolicyName 
 		{
 			get 

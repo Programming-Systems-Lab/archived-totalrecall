@@ -46,7 +46,6 @@ namespace PSL.TotalRecall.PolicyManager
 		private System.Windows.Forms.Label label7;
 		private System.Windows.Forms.Label label8;
 		private System.Windows.Forms.TextBox policyIDText;
-		private System.Windows.Forms.Button modifyPolicyButton;
 		private System.Windows.Forms.Button newCategoryButton;
 
 		private PolicyDAO policyDAO;
@@ -208,7 +207,6 @@ namespace PSL.TotalRecall.PolicyManager
 			this.evaluatePolicyButton = new System.Windows.Forms.Button();
 			this.newPolicyButton = new System.Windows.Forms.Button();
 			this.policyText = new System.Windows.Forms.TextBox();
-			this.modifyPolicyButton = new System.Windows.Forms.Button();
 			this.tabs.SuspendLayout();
 			this.resourcesTab.SuspendLayout();
 			this.categoriesTab.SuspendLayout();
@@ -224,7 +222,7 @@ namespace PSL.TotalRecall.PolicyManager
 			this.tabs.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tabs.Name = "tabs";
 			this.tabs.SelectedIndex = 0;
-			this.tabs.Size = new System.Drawing.Size(424, 429);
+			this.tabs.Size = new System.Drawing.Size(416, 389);
 			this.tabs.TabIndex = 7;
 			this.tabs.SelectedIndexChanged += new System.EventHandler(this.tabs_SelectedIndexChanged);
 			// 
@@ -242,16 +240,16 @@ namespace PSL.TotalRecall.PolicyManager
 																					   this.removeCategoryFromResourceButton});
 			this.resourcesTab.Location = new System.Drawing.Point(4, 22);
 			this.resourcesTab.Name = "resourcesTab";
-			this.resourcesTab.Size = new System.Drawing.Size(392, 379);
+			this.resourcesTab.Size = new System.Drawing.Size(416, 371);
 			this.resourcesTab.TabIndex = 0;
 			this.resourcesTab.Text = "Resources";
 			// 
 			// addResourceButton
 			// 
 			this.addResourceButton.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left);
-			this.addResourceButton.Location = new System.Drawing.Point(8, 328);
+			this.addResourceButton.Location = new System.Drawing.Point(8, 344);
 			this.addResourceButton.Name = "addResourceButton";
-			this.addResourceButton.Size = new System.Drawing.Size(96, 24);
+			this.addResourceButton.Size = new System.Drawing.Size(104, 24);
 			this.addResourceButton.TabIndex = 14;
 			this.addResourceButton.Text = "Add resource...";
 			this.addResourceButton.Click += new System.EventHandler(this.addResourceButton_Click);
@@ -259,7 +257,7 @@ namespace PSL.TotalRecall.PolicyManager
 			// addCategoryToResourceButton
 			// 
 			this.addCategoryToResourceButton.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left);
-			this.addCategoryToResourceButton.Location = new System.Drawing.Point(176, 256);
+			this.addCategoryToResourceButton.Location = new System.Drawing.Point(176, 248);
 			this.addCategoryToResourceButton.Name = "addCategoryToResourceButton";
 			this.addCategoryToResourceButton.Size = new System.Drawing.Size(32, 24);
 			this.addCategoryToResourceButton.TabIndex = 13;
@@ -278,10 +276,11 @@ namespace PSL.TotalRecall.PolicyManager
 			// 
 			this.resourceCategoriesList.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left);
 			this.resourceCategoriesList.Enabled = false;
-			this.resourceCategoriesList.Location = new System.Drawing.Point(8, 240);
+			this.resourceCategoriesList.Location = new System.Drawing.Point(8, 232);
 			this.resourceCategoriesList.Name = "resourceCategoriesList";
 			this.resourceCategoriesList.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-			this.resourceCategoriesList.Size = new System.Drawing.Size(160, 82);
+			this.resourceCategoriesList.Size = new System.Drawing.Size(160, 108);
+			this.resourceCategoriesList.Sorted = true;
 			this.resourceCategoriesList.TabIndex = 9;
 			// 
 			// resourcesList
@@ -291,24 +290,27 @@ namespace PSL.TotalRecall.PolicyManager
 				| System.Windows.Forms.AnchorStyles.Right);
 			this.resourcesList.Location = new System.Drawing.Point(8, 24);
 			this.resourcesList.Name = "resourcesList";
-			this.resourcesList.Size = new System.Drawing.Size(376, 186);
+			this.resourcesList.Size = new System.Drawing.Size(400, 173);
+			this.resourcesList.Sorted = true;
 			this.resourcesList.TabIndex = 7;
+			this.resourcesList.DoubleClick += new System.EventHandler(this.resourcesList_DoubleClick);
 			this.resourcesList.SelectedIndexChanged += new System.EventHandler(this.resourcesList_SelectedIndexChanged);
 			// 
 			// availableCategoriesList
 			// 
 			this.availableCategoriesList.Anchor = ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
 				| System.Windows.Forms.AnchorStyles.Right);
-			this.availableCategoriesList.Location = new System.Drawing.Point(216, 240);
+			this.availableCategoriesList.Location = new System.Drawing.Point(216, 232);
 			this.availableCategoriesList.Name = "availableCategoriesList";
 			this.availableCategoriesList.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-			this.availableCategoriesList.Size = new System.Drawing.Size(168, 82);
+			this.availableCategoriesList.Size = new System.Drawing.Size(192, 108);
+			this.availableCategoriesList.Sorted = true;
 			this.availableCategoriesList.TabIndex = 8;
 			// 
 			// label2
 			// 
 			this.label2.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left);
-			this.label2.Location = new System.Drawing.Point(8, 224);
+			this.label2.Location = new System.Drawing.Point(8, 216);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(152, 16);
 			this.label2.TabIndex = 10;
@@ -317,7 +319,7 @@ namespace PSL.TotalRecall.PolicyManager
 			// label3
 			// 
 			this.label3.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left);
-			this.label3.Location = new System.Drawing.Point(216, 224);
+			this.label3.Location = new System.Drawing.Point(216, 216);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(152, 16);
 			this.label3.TabIndex = 12;
@@ -326,7 +328,7 @@ namespace PSL.TotalRecall.PolicyManager
 			// removeCategoryFromResourceButton
 			// 
 			this.removeCategoryFromResourceButton.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left);
-			this.removeCategoryFromResourceButton.Location = new System.Drawing.Point(176, 288);
+			this.removeCategoryFromResourceButton.Location = new System.Drawing.Point(176, 280);
 			this.removeCategoryFromResourceButton.Name = "removeCategoryFromResourceButton";
 			this.removeCategoryFromResourceButton.Size = new System.Drawing.Size(32, 24);
 			this.removeCategoryFromResourceButton.TabIndex = 13;
@@ -346,14 +348,14 @@ namespace PSL.TotalRecall.PolicyManager
 																						this.label4});
 			this.categoriesTab.Location = new System.Drawing.Point(4, 22);
 			this.categoriesTab.Name = "categoriesTab";
-			this.categoriesTab.Size = new System.Drawing.Size(416, 403);
+			this.categoriesTab.Size = new System.Drawing.Size(416, 371);
 			this.categoriesTab.TabIndex = 1;
 			this.categoriesTab.Text = "Categories";
 			// 
 			// currentPolicyText
 			// 
 			this.currentPolicyText.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left);
-			this.currentPolicyText.Location = new System.Drawing.Point(8, 264);
+			this.currentPolicyText.Location = new System.Drawing.Point(8, 232);
 			this.currentPolicyText.Name = "currentPolicyText";
 			this.currentPolicyText.ReadOnly = true;
 			this.currentPolicyText.Size = new System.Drawing.Size(160, 20);
@@ -363,7 +365,7 @@ namespace PSL.TotalRecall.PolicyManager
 			// setPolicyButton
 			// 
 			this.setPolicyButton.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left);
-			this.setPolicyButton.Location = new System.Drawing.Point(176, 264);
+			this.setPolicyButton.Location = new System.Drawing.Point(176, 232);
 			this.setPolicyButton.Name = "setPolicyButton";
 			this.setPolicyButton.Size = new System.Drawing.Size(32, 24);
 			this.setPolicyButton.TabIndex = 21;
@@ -374,15 +376,15 @@ namespace PSL.TotalRecall.PolicyManager
 			// 
 			this.availablePoliciesList.Anchor = ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
 				| System.Windows.Forms.AnchorStyles.Right);
-			this.availablePoliciesList.Location = new System.Drawing.Point(216, 264);
+			this.availablePoliciesList.Location = new System.Drawing.Point(216, 232);
 			this.availablePoliciesList.Name = "availablePoliciesList";
-			this.availablePoliciesList.Size = new System.Drawing.Size(192, 82);
+			this.availablePoliciesList.Size = new System.Drawing.Size(192, 108);
 			this.availablePoliciesList.TabIndex = 16;
 			// 
 			// label5
 			// 
 			this.label5.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left);
-			this.label5.Location = new System.Drawing.Point(8, 248);
+			this.label5.Location = new System.Drawing.Point(8, 216);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(152, 16);
 			this.label5.TabIndex = 18;
@@ -391,7 +393,7 @@ namespace PSL.TotalRecall.PolicyManager
 			// label6
 			// 
 			this.label6.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left);
-			this.label6.Location = new System.Drawing.Point(216, 248);
+			this.label6.Location = new System.Drawing.Point(216, 216);
 			this.label6.Name = "label6";
 			this.label6.Size = new System.Drawing.Size(152, 16);
 			this.label6.TabIndex = 19;
@@ -400,7 +402,7 @@ namespace PSL.TotalRecall.PolicyManager
 			// newCategoryButton
 			// 
 			this.newCategoryButton.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left);
-			this.newCategoryButton.Location = new System.Drawing.Point(8, 360);
+			this.newCategoryButton.Location = new System.Drawing.Point(8, 344);
 			this.newCategoryButton.Name = "newCategoryButton";
 			this.newCategoryButton.Size = new System.Drawing.Size(104, 24);
 			this.newCategoryButton.TabIndex = 15;
@@ -414,8 +416,10 @@ namespace PSL.TotalRecall.PolicyManager
 				| System.Windows.Forms.AnchorStyles.Right);
 			this.categoriesList.Location = new System.Drawing.Point(8, 24);
 			this.categoriesList.Name = "categoriesList";
-			this.categoriesList.Size = new System.Drawing.Size(400, 212);
+			this.categoriesList.Size = new System.Drawing.Size(400, 173);
+			this.categoriesList.Sorted = true;
 			this.categoriesList.TabIndex = 13;
+			this.categoriesList.DoubleClick += new System.EventHandler(this.categoriesList_DoubleClick);
 			this.categoriesList.SelectedIndexChanged += new System.EventHandler(this.categoriesList_SelectedIndexChanged);
 			// 
 			// label4
@@ -435,11 +439,10 @@ namespace PSL.TotalRecall.PolicyManager
 																					  this.policiesList,
 																					  this.evaluatePolicyButton,
 																					  this.newPolicyButton,
-																					  this.policyText,
-																					  this.modifyPolicyButton});
+																					  this.policyText});
 			this.policiesTab.Location = new System.Drawing.Point(4, 22);
 			this.policiesTab.Name = "policiesTab";
-			this.policiesTab.Size = new System.Drawing.Size(416, 403);
+			this.policiesTab.Size = new System.Drawing.Size(408, 363);
 			this.policiesTab.TabIndex = 2;
 			this.policiesTab.Text = "Policies";
 			// 
@@ -450,7 +453,7 @@ namespace PSL.TotalRecall.PolicyManager
 			this.policyIDText.Location = new System.Drawing.Point(64, 128);
 			this.policyIDText.Name = "policyIDText";
 			this.policyIDText.ReadOnly = true;
-			this.policyIDText.Size = new System.Drawing.Size(344, 20);
+			this.policyIDText.Size = new System.Drawing.Size(336, 20);
 			this.policyIDText.TabIndex = 17;
 			this.policyIDText.Text = "";
 			// 
@@ -476,14 +479,16 @@ namespace PSL.TotalRecall.PolicyManager
 				| System.Windows.Forms.AnchorStyles.Right);
 			this.policiesList.Location = new System.Drawing.Point(8, 24);
 			this.policiesList.Name = "policiesList";
-			this.policiesList.Size = new System.Drawing.Size(400, 95);
+			this.policiesList.Size = new System.Drawing.Size(392, 95);
+			this.policiesList.Sorted = true;
 			this.policiesList.TabIndex = 9;
+			this.policiesList.DoubleClick += new System.EventHandler(this.policiesList_DoubleClick);
 			this.policiesList.SelectedIndexChanged += new System.EventHandler(this.policiesList_SelectedIndexChanged);
 			// 
 			// evaluatePolicyButton
 			// 
-			this.evaluatePolicyButton.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left);
-			this.evaluatePolicyButton.Location = new System.Drawing.Point(272, 365);
+			this.evaluatePolicyButton.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right);
+			this.evaluatePolicyButton.Location = new System.Drawing.Point(296, 336);
 			this.evaluatePolicyButton.Name = "evaluatePolicyButton";
 			this.evaluatePolicyButton.Size = new System.Drawing.Size(104, 24);
 			this.evaluatePolicyButton.TabIndex = 8;
@@ -493,11 +498,11 @@ namespace PSL.TotalRecall.PolicyManager
 			// newPolicyButton
 			// 
 			this.newPolicyButton.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left);
-			this.newPolicyButton.Location = new System.Drawing.Point(8, 365);
+			this.newPolicyButton.Location = new System.Drawing.Point(8, 336);
 			this.newPolicyButton.Name = "newPolicyButton";
-			this.newPolicyButton.Size = new System.Drawing.Size(80, 24);
+			this.newPolicyButton.Size = new System.Drawing.Size(96, 24);
 			this.newPolicyButton.TabIndex = 7;
-			this.newPolicyButton.Text = "New Policy...";
+			this.newPolicyButton.Text = "New policy...";
 			this.newPolicyButton.Click += new System.EventHandler(this.newPolicyButton_Click);
 			// 
 			// policyText
@@ -511,24 +516,14 @@ namespace PSL.TotalRecall.PolicyManager
 			this.policyText.Name = "policyText";
 			this.policyText.ReadOnly = true;
 			this.policyText.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-			this.policyText.Size = new System.Drawing.Size(400, 197);
+			this.policyText.Size = new System.Drawing.Size(392, 157);
 			this.policyText.TabIndex = 6;
 			this.policyText.Text = "";
-			// 
-			// modifyPolicyButton
-			// 
-			this.modifyPolicyButton.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left);
-			this.modifyPolicyButton.Enabled = false;
-			this.modifyPolicyButton.Location = new System.Drawing.Point(96, 365);
-			this.modifyPolicyButton.Name = "modifyPolicyButton";
-			this.modifyPolicyButton.Size = new System.Drawing.Size(80, 24);
-			this.modifyPolicyButton.TabIndex = 7;
-			this.modifyPolicyButton.Text = "Modify";
 			// 
 			// PolicyEditor
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-			this.ClientSize = new System.Drawing.Size(424, 429);
+			this.ClientSize = new System.Drawing.Size(416, 389);
 			this.Controls.AddRange(new System.Windows.Forms.Control[] {
 																		  this.tabs});
 			this.MaximizeBox = false;
@@ -693,11 +688,12 @@ namespace PSL.TotalRecall.PolicyManager
 
 		private void newCategoryButton_Click(object sender, System.EventArgs e)
 		{
-			AddCategoryForm form = new AddCategoryForm();
+			
 			AccessPolicy[] policies = new AccessPolicy[policiesList.Items.Count];
 			policiesList.Items.CopyTo(policies, 0);
 			
-			form.policyList.Items.AddRange(policies);
+			AddCategoryForm form = new AddCategoryForm(policies);
+			
 
 			DialogResult result = form.ShowDialog(this);
 			if (result != DialogResult.Cancel) 
@@ -736,7 +732,7 @@ namespace PSL.TotalRecall.PolicyManager
 						if (o != null) 
 							Clipboard.SetDataObject(o, true);
 					}
-					catch (Exception e) {
+					catch (Exception /*e*/) {
 						// oh well 
 					}
 				}
@@ -777,7 +773,7 @@ namespace PSL.TotalRecall.PolicyManager
 			if (category != null && policy != null) 
 			{
 				category.PolicyID = policy.Id;
-				bool success = categoryDAO.UpdateCategoryPolicy(category.Name, policy.Id);
+				bool success = categoryDAO.UpdateCategory(category.Name, policy.Id);
 				if (success) 
 				{
 					currentPolicyText.Text = policy.Name;
@@ -785,6 +781,97 @@ namespace PSL.TotalRecall.PolicyManager
 				else 
 				{
 					Error("Could not update category's policy");
+				}
+			}
+		}
+
+		private void resourcesList_DoubleClick(object sender, System.EventArgs e)
+		{
+			Resource res = (Resource) resourcesList.SelectedItem;
+			if (res != null) 
+			{
+				AddResourceForm form = new AddResourceForm();
+				form.SetModify(res.Name, res.Url);
+
+				DialogResult result = form.ShowDialog(this);
+				if (result != DialogResult.Cancel) 
+				{
+					res.Name = form.ResourceName;
+					res.Url = form.ResourceUrl;
+
+					bool success = resourceDAO.UpdateResource(res.ID, res.Name, res.Url);
+					
+					if (success) 
+					{
+						RefreshResourceList();
+					}
+					else 
+					{
+						Error("Could not update resource.");
+					}
+				}
+			}
+		}
+
+		private void categoriesList_DoubleClick(object sender, System.EventArgs e)
+		{
+			Category cat = (Category) categoriesList.SelectedItem;
+			string originalName = cat.Name;
+
+			if (cat != null) 
+			{	
+				
+				AccessPolicy[] policies = new AccessPolicy[policiesList.Items.Count];
+				policiesList.Items.CopyTo(policies, 0);
+				AddCategoryForm form = new AddCategoryForm(policies);
+
+				form.SetModify(cat.Name, (AccessPolicy) policyTable[cat.PolicyID]);
+
+				DialogResult result = form.ShowDialog(this);
+				if (result != DialogResult.Cancel) 
+				{
+					cat.Name = form.CategoryName;
+					cat.PolicyID = form.SelectedPolicy.Id;
+
+					bool success = categoryDAO.UpdateCategory(originalName, cat.Name, cat.PolicyID);
+					if (success) 
+					{
+						RefreshCategoryList();
+					}
+					else 
+					{
+						Error("Could not update category.");
+					}
+
+				}
+
+			}
+		}
+
+		private void policiesList_DoubleClick(object sender, System.EventArgs e)
+		{
+			AccessPolicy policy = (AccessPolicy) policiesList.SelectedItem;
+			if (policy != null) 
+			{
+
+				AddPolicyForm form = new AddPolicyForm();
+				form.SetModify(policy.Name, policy.Document);
+
+				DialogResult result = form.ShowDialog(this);
+				if (result != DialogResult.Cancel) 
+				{
+					policy.Name = form.PolicyName;
+					policy.Document = form.PolicyDoc;
+
+					bool success = policyDAO.UpdatePolicy(policy.Id, policy.Document, policy.Name);
+					if (success) 
+					{
+						RefreshPolicyLists();
+					}
+					else
+					{
+						Error("Could not update policy.");
+					}
 				}
 			}
 		}
