@@ -17,11 +17,6 @@ namespace PSL.TotalRecall.PolicyManager
 	public class PolicyManager
 	{
 		/// <summary>
-		/// The assembly used to load plugin classes
-		/// </summary>
-		//private static Assembly pluginAssembly = Assembly.GetExecutingAssembly();	// TODO: might need to modify this
-		
-		/// <summary>
 		/// The serializer to use for deserializing policy documents
 		/// </summary>
 		private XmlSerializer serializer = new XmlSerializer(typeof(Policy));
@@ -31,28 +26,65 @@ namespace PSL.TotalRecall.PolicyManager
 		/// IPolicyEvaluator class name
 		/// </summary>
 		//private static Hashtable evaluatorNames;
-		private static IDictionary evaluatorMappings = 
-			(IDictionary) ConfigurationSettings.GetConfig("PolicyEvaluatorMappings");
+		private static IDictionary evaluatorMappings;
+
+		/// <summary>
+		/// A table of mappings between evaluator class names and an existing instantiation
+		/// of the class (for caching instances).
+		/// </summary>
+		private static Hashtable evaluators;
 
 		public const string TAG = "Policy";
 
 		/// <summary>
-		/// Used for testing. Pass a policy XML file as the first argument.
+		/// Used for testing. 
 		/// </summary>
 		[STAThread]
 		static void Main(string[] args)
 		{
 			PolicyManager manager = new PolicyManager();
 
-			XmlDocument doc = new XmlDocument();
-			doc.Load(args[0]);
-			EvaluationResult result = manager.evaluatePolicy(doc, new TestContext());
-			result.dumpResults(Console.Out);
-			debug("done");
+			Console.WriteLine("Enter name of policy XML doc to evaluate, or [Enter] to exit.");
+			while (true) 
+			{
+				Console.Write("\n> ");
+				string docName = Console.ReadLine();
+				if (docName.Length == 0) 
+				{
+					break;
+				}
+
+				try 
+				{
+					StreamReader reader = new StreamReader(docName);
+					string doc = reader.ReadToEnd();
+					reader.Close();
+
+					EvaluationResult result = manager.evaluatePolicy(doc, new TestContext());
+					result.dumpResults(Console.Out);
+				}
+				catch (Exception e) 
+				{
+					Console.WriteLine("An error occurred: " + e.Message);
+				}
+				
+			}
 		}
 
+		/// <summary>
+		/// Static constructor, initializes evaluator tables.
+		/// </summary>
 		static PolicyManager() 
 		{
+			
+			evaluatorMappings = (IDictionary) ConfigurationSettings.GetConfig("PolicyEvaluatorMappings");
+			if (evaluatorMappings == null) 
+			{
+				throw new PolicyManagerException("Evaluator mappings not found in .config file");
+			}
+
+			evaluators = new Hashtable();
+
 			// initialize table 
 			// TODO: probably read this from some config file
 			// use ConfigurationSettings.AppSettings["foo"];
@@ -75,7 +107,45 @@ namespace PSL.TotalRecall.PolicyManager
 		/// <param name="policy"></param>
 		/// <param name="context"></param>
 		/// <returns>
-		///		An EvaluationResult indiciating whether the policy is satisfied under the
+		///		An EvaluationResult indicating whether the policy is satisfied under the
+		///		current context or not.
+		///	</returns>
+		///	<exception cref="PSL.TotalRecall.PolicyManager.PolicyManagerException">
+		///		Thrown if there is a problem parsing the XML or analysing the policy.
+		///	</exception>
+		public EvaluationResult evaluatePolicy(string policyDoc, IContext context)
+		{
+			
+			if (policyDoc == null || context == null) 
+			{
+				throw new PolicyManagerException("Arguments cannot be null");
+			}
+
+			// first de-serialize the xml document
+			Policy policy = null;
+			try 
+			{
+				StringReader reader = new StringReader(policyDoc);
+				policy = (Policy) serializer.Deserialize(reader);
+				reader.Close();
+			}
+			catch (Exception e) 
+			{
+				throw new PolicyManagerException("Could not deserialize policy document", e);
+			}
+			
+			// now evaluate the one element in this policy
+			return invokeEvaluator(policy.Any, context);
+
+		}
+
+		/// <summary>
+		/// Evaluates a policy with respect to the given context.
+		/// </summary>
+		/// <param name="policy"></param>
+		/// <param name="context"></param>
+		/// <returns>
+		///		An EvaluationResult indicating whether the policy is satisfied under the
 		///		current context or not.
 		///	</returns>
 		///	<exception cref="PSL.TotalRecall.PolicyManager.PolicyManagerException">
@@ -95,6 +165,7 @@ namespace PSL.TotalRecall.PolicyManager
 			{
 				XmlNodeReader reader = new XmlNodeReader(policyDoc);
 				policy = (Policy) serializer.Deserialize(reader);
+				reader.Close();
 			}
 			catch (Exception e) 
 			{
@@ -106,45 +177,57 @@ namespace PSL.TotalRecall.PolicyManager
 			
 		}
 		
+		/// <summary>
+		/// Invokes an IPolicyEvaluator to evaluate the given XML element in the given
+		/// context. An evaluator for the element must be registered in the PolicyManager 
+		/// configuration (.config) file. Mappings are registered by element schema namespaces.
+		/// </summary>
+		/// <param name="element">The element to evaluate.</param>
+		/// <param name="context">The context under which to evaluate this element</param>
+		/// <returns>The EvaluationResult that the evaluator returns.</returns>
 		public static EvaluationResult invokeEvaluator(XmlElement element, IContext context) 
 		{
 			EvaluationResult result = null;
 
 			// get class that corresponds to this element
 			// we use the namespace attribute for this tag
-			
-			//string className = (string) evaluatorNames[element.NamespaceURI];
 			string className = (string) evaluatorMappings[element.NamespaceURI];
 
 			if (className == null) 
 			{
-				result = new EvaluationResult(TAG, false, "Evaluator class not found for tag " +
+				return new EvaluationResult(TAG, false, "Evaluator class not found for tag " +
 					element.LocalName + " in namespace " + element.NamespaceURI);
 			}
-			else 
-			{
+			
 
-				//object o = pluginAssembly.CreateInstance(className, true);
+			// check if an evaluator for this class is already instantiated
+			IPolicyEvaluator evaluator = (IPolicyEvaluator) evaluators[className];
+			if (evaluator == null) 
+			{
+				// try to instantiate this evaluator
 				Type type = Type.GetType(className);
 				object o = Activator.CreateInstance(type);
 				if (o == null || !(o is IPolicyEvaluator))
 				{
-					result = new EvaluationResult(TAG, false, "Could not load plugin for " + element.LocalName);
+					return new EvaluationResult(TAG, false, "Could not load evaluator for " + element.LocalName);
 				}
-				else 
-				{
-					// invoke the evaluator!
-					IPolicyEvaluator evaluator = (IPolicyEvaluator) o;
-					result = evaluator.evaluateExpression(element, context);
-				}
+				
+				debug("instantiated evaluator for class " + className);
+
+				evaluator = (IPolicyEvaluator) o;
+				evaluators.Add(className, evaluator);
 			}
 
+			// now invoke the evaluator!
+			result = evaluator.evaluateExpression(element, context);
 			return result;
 		}
 
 		private static void debug(Object o) 
 		{
+#if DEBUG
 			Console.WriteLine(o);
+#endif
 		}
 	}
 
