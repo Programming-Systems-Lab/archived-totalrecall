@@ -80,7 +80,7 @@ create table Participants
 -- information agents we meet
 create table ContactCache
 (
-	CONTACT_ID nvarchar(100) not null primary key constraint FK_ContactCache_Contact_ID Foreign key references Contacts(CONTACT_ID) on delete no action,	
+	CONTACT_ID nvarchar(100) not null primary key constraint FK_ContactCache_Contact_ID Foreign key references Contacts(CONTACT_ID) on delete cascade,	
 	PART_LOC nvarchar(256) not null check(len(PART_LOC) > 0)		
 )
 
