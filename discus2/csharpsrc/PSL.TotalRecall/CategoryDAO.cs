@@ -54,7 +54,6 @@ namespace PSL.TotalRecall
 
 		public ArrayList GetAllCategories()
 		{
-			// Quick error checks
 			ArrayList categories = new ArrayList();
 			OdbcDataReader dr = null;
 						
@@ -88,5 +87,6 @@ namespace PSL.TotalRecall
 			return categories;
 		}
 
+		
 	}
 }
