@@ -108,7 +108,8 @@ namespace PSL.TotalRecall.PolicyManager
 		/// </summary>
 		private void RefreshResourceCategoryList() 
 		{
-			Resource res = (Resource)resourcesList.SelectedItem;
+
+			Resource res = (Resource) resourcesList.SelectedItem;
 			if (res == null) 
 			{
 				return;
@@ -534,12 +535,12 @@ namespace PSL.TotalRecall.PolicyManager
 			MessageBox.Show(this, "New policy created with id " + id);
 		}
 
-		private void resourcesList_SelectedIndexChanged(object sender, System.EventArgs e)
+		private void resourcesList_SelectedIndexChanged(object sender, System.EventArgs evt)
 		{
 			RefreshResourceCategoryList();
 		}
 
-		private void addCategoryToResourceButton_Click(object sender, System.EventArgs e)
+		private void addCategoryToResourceButton_Click(object sender, System.EventArgs evt)
 		{
 			Resource resource = (Resource) resourcesList.SelectedItem;
 			ListBox.SelectedObjectCollection categories = availableCategoriesList.SelectedItems;

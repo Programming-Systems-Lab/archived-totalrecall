@@ -59,7 +59,7 @@ namespace PSL.TotalRecall.PolicyManager
 			}
 			catch (PolicyManagerException /*e*/) 
 			{
-				return new EvaluationResult(TAG, false, "Could not evaluate policy id " + expression.policyId);
+				return new EvaluationResult(TAG, false, "Could not evaluate policy id " + expression.policyId + ": " + e);
 			}
 			
 		}
